@@ -52,11 +52,12 @@ sAndbox.EventHud("DrawHud", function()
         {
             Version = 1.0
         },
-        DrawHuds and sAndbox.ScreenHud(DrawHuds.setplaceLS, DrawHuds.setplaceBS, 1, 1, 200, 100, Color(0, 0, 0, 200)),
-        DrawHuds and sAndbox.ScreenText("sAndbox", DrawHuds.setplaceLS, DrawHuds.setplaceBS, 1, 1, 200, 100, Color(255, 255, 255)),
-        DrawHuds and sAndbox.ScreenText("Health: " .. tostring(LocalPlayer():Health()), DrawHuds.setplaceLS, DrawHuds.setplaceBS, 1, 1.02, 1, 1, Color(255, 255, 255)),
+        DrawHuds and sAndbox.ScreenHud(DrawHuds.setplaceLS, DrawHuds.setplaceBS, 1, 1, 200, 100, Color(51, 51, 51, 226)),
+        DrawHuds and sAndbox.ScreenText("sAndbox", DrawHuds.setplaceLS + 5, DrawHuds.setplaceBS + 2, 1, 1, 200, 100, Color(88, 176, 1)),
+        DrawHuds and sAndbox.ScreenText("Health: " .. tostring(LocalPlayer():Health()), DrawHuds.setplaceLS + 5, DrawHuds.setplaceBS + 2, 1, 1.02, 1, 1, Color(88, 176, 1)),
+        surface.SetDrawColor(255, 255, 255, 255),
+        surface.DrawOutlinedRect(DrawHuds.setplaceLS, DrawHuds.setplaceBS, 200, 100, 3),
     }
-    --print(DrawHuds.setplaceLS), 
 end, {
     setplaceLS = sAndbox.placeW.LEFT_SCREEN,
     setplaceBS = sAndbox.placeH.BOTTOM_SCREEN

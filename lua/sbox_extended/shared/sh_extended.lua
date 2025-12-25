@@ -57,7 +57,7 @@ end
 
 function sAndbox.EventHud(hooks_str, hooks_func, ex)
     if SERVER then return end
-    if HookExists(hooks_str) then return end
+    //if HookExists(hooks_str) then return end
     hook.Add("HUDPaint", tostring(hooks_str), hooks_func)
     sAndbox.AddonLogger[hooks_str] = ex
     sAndbox.Log.Print("Loaded: " .. hooks_str)
@@ -71,16 +71,16 @@ function sAndbox.HudHide(tbl)
 
     hook.Add("HUDShouldDraw", "HideHUD", function(name)
         if newtbl[name] then return false end
-        -- Don't return anything here, it may break other addons that rely on this hook.
     end)
 end
 
 function sAndbox.FatFont(fonts, name, sizes, weights)
     surface.CreateFont(name, {
-        font = fonts, -- Use the font-name which is shown to you by your operating system Font Viewer.
+        font = fonts,
         extended = false,
         size = sizes,
-        weight = weights
+        weight = weights,
+        underline = true,
     })
 end
 
