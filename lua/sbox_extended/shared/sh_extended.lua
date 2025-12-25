@@ -47,6 +47,14 @@ function sAndbox.Event(hooks_str, hooks_func)
     sAndbox.Log.Print("Loaded: " .. hooks_str)
 end
 
+function sAndbox.Timer(funcs)
+    timer.Simple(3, funcs)
+end
+
+function sAndbox.using(id)
+    return sAndbox.AddonLogger[id]
+end
+
 function sAndbox.EventHud(hooks_str, hooks_func, ex)
     if SERVER then return end
     if HookExists(hooks_str) then return end
@@ -76,10 +84,6 @@ function sAndbox.FatFont(fonts, name, sizes, weights)
     })
 end
 
-function sAndbox.using(id)
-    return sAndbox.AddonLogger[id]
-end
-
 sAndbox.Event("logger-info", function()
     return {
         {
@@ -100,6 +104,7 @@ sAndbox.Event("logger-info", function()
             local fr = file.Read("sAndbox_logs.txt") .. msg .. ";\n"
             file.Write("sAndbox_logs.txt", fr)
             if log then print(Format("Writing %s to sAndbox_logs.txt", msg)) end
+            return msg
         end
     }
 end)

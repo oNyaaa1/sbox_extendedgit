@@ -5,7 +5,8 @@ function client:SetCustomPermission(rank)
     self:SetNWFloat("permission", ranks)
     self:SetPData("permission", ranks)
     print(Format("Console: set %s to %s", self:Nick(), rank))
-    using("logger-info")().Logger(os.date() .. " Name: " .. self:Nick() .. " Rank: " .. rank .. " SteamID: " .. self:SteamID64() .. " IP: " .. self:IPAddress(),true)
+    local log = sAndbox.using("logger-info")()
+    log.Logger(os.date() .. " Name: " .. self:Nick() .. " Rank: " .. rank .. " SteamID: " .. self:SteamID64() .. " IP: " .. self:IPAddress(), true)
 end
 
 hook.Add("PlayerInitialSpawn", "NoRankSet", function(ply)

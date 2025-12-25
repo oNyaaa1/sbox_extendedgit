@@ -1,5 +1,9 @@
 sAndbox = sAndbox or {}
 local time = CurTime()
+/*
+Fixed Logging error
+Fixed hud not showing
+*/
 function FindShared(files)
 	if string.find(files, "sh_") then
 		print("Adding Shared File: " .. files)

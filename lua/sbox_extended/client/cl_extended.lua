@@ -37,7 +37,7 @@ sAndbox.ScreenText = function(text, itemw, itemh, x, y, w, h, col, align)
 end
 
 sAndbox.HudHide({"CHudHealth"})
-local DrawHuds = sAndbox.using("DrawHud")
+local DrawHuds = nil
 sAndbox.EventHud("DrawHud", function()
     return {
         {
@@ -54,10 +54,12 @@ sAndbox.EventHud("DrawHud", function()
         },
         DrawHuds and sAndbox.ScreenHud(DrawHuds.setplaceLS, DrawHuds.setplaceBS, 1, 1, 200, 100, Color(0, 0, 0, 200)),
         DrawHuds and sAndbox.ScreenText("sAndbox", DrawHuds.setplaceLS, DrawHuds.setplaceBS, 1, 1, 200, 100, Color(255, 255, 255)),
-        DrawHuds and sAndbox.ScreenText("Health: " .. tostring(LocalPlayer():Health()), DrawHuds.setplaceLS, DrawHuds.setplaceBS, 1,1.02, 1, 1, Color(255, 255, 255)),
+        DrawHuds and sAndbox.ScreenText("Health: " .. tostring(LocalPlayer():Health()), DrawHuds.setplaceLS, DrawHuds.setplaceBS, 1, 1.02, 1, 1, Color(255, 255, 255)),
     }
     --print(DrawHuds.setplaceLS), 
 end, {
     setplaceLS = sAndbox.placeW.LEFT_SCREEN,
     setplaceBS = sAndbox.placeH.BOTTOM_SCREEN
 })
+
+DrawHuds = sAndbox.using("DrawHud")
