@@ -1,17 +1,7 @@
 sAndbox = sAndbox or {}
 local time = CurTime()
 /*
-Denied any false ranks to the list
-Added Blueprint system
-Added sounds
-sAndbox.AddSounds("blip", "ui/blip.wav")
-sAndbox.AddSounds("piemenu_select", "ui/piemenu/piemenu_select.wav")
-sAndbox.AddSounds("piemenu_cancel", "ui/piemenu/piemenu_cancel.wav")
-sAndbox.AddSounds("piemenu_open", "ui/piemenu/piemenu_open.wav")
-function sAndbox.GetSounds(name)
-    return sAndbox.TableSounds[name]
-end
-Added sAndbox.BuildingPrev(ply, tc, radius)
+
 */
 function FindShared(files)
 	if string.find(files, "sh_") then
