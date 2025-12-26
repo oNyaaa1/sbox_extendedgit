@@ -74,6 +74,14 @@ function sAndbox.HudHide(tbl)
     hook.Add("HUDShouldDraw", "HideHUD", function(name) if newtbl[name] then return false end end)
 end
 
+function sAndbox.BuildingPrev(ply, tc, radius)
+    if not IsValid(ply) or not IsValid(tc) then return false end
+    local TC_RADIUS = 30 -- meters
+    local TC_RADIUS_SQR = TC_RADIUS * TC_RADIUS -- 900
+    if tc:GetPos():Distance2DSqr(ply:GetPos()) <= TC_RADIUS_SQR and tc.Owner == ply then return true end
+    return false
+end
+
 function sAndbox.FatFont(fonts, name, sizes, weights)
     surface.CreateFont(name, {
         font = fonts,
@@ -82,6 +90,19 @@ function sAndbox.FatFont(fonts, name, sizes, weights)
         weight = weights,
         underline = true,
     })
+end
+
+sAndbox.TableSounds = {}
+function sAndbox.AddSounds(name, sound2)
+    sAndbox.TableSounds[name] = sound2
+end
+
+sAndbox.AddSounds("blip", "ui/blip.wav")
+sAndbox.AddSounds("piemenu_select", "ui/piemenu/piemenu_select.wav")
+sAndbox.AddSounds("piemenu_cancel", "ui/piemenu/piemenu_cancel.wav")
+sAndbox.AddSounds("piemenu_open", "ui/piemenu/piemenu_open.wav")
+function sAndbox.GetSounds(name)
+    return sAndbox.TableSounds[name]
 end
 
 sAndbox.Event("logger-info", function()

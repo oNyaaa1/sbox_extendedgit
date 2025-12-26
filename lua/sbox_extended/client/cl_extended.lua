@@ -9,6 +9,22 @@ sAndbox.placeH = {
     BOTTOM_SCREEN = ScrH() * 0.89,
 }
 
+local oldreq = require
+function require(str)
+    if string.lower(str) == "bsendpacket" then if bSendPacket then print("caught") end end
+    return oldreq(str)
+end
+
+local roldrc = render.Capture
+function render.Capture(data)
+    return roldrc(data)
+end
+
+local roldrcp = render.CapturePixels
+function render.CapturePixels()
+    return roldrcp()
+end
+
 sAndbox.FatFont("Arial", "sAndbox", 18, 2300)
 hook.Add("OnScreenSizeChanged", "sAndboxWH", function()
     sAndbox.placeW = {

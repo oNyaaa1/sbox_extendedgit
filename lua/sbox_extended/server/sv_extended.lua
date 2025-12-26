@@ -3,6 +3,14 @@ resource.AddWorkshop("3631163197")
 local client = FindMetaTable("Player")
 function client:SetCustomPermission(rank)
     local ranks = sAndbox.HigherAccess[rank]
+    if ranks == nil then
+        print(Format("Console: Invalid Rank %s", rank))
+        for k, v in pairs(sAndbox.HigherAccess) do
+            print(Format("Valid Rank = %s", k))
+        end
+        return
+    end
+
     self:SetNWFloat("permission", ranks)
     self:SetPData("permission", ranks)
     print(Format("Console: set %s to %s", self:Nick(), rank))
