@@ -18,11 +18,6 @@ function client:HasCustomPermission(rank)
     return permissions == sAndbox.HigherAccess[rank]
 end
 
-function client:CanTarget(permission)
-    if not IsValid(self) then return false end
-    return self:GetNWString("permission", "user") == permission
-end
-
 function sAndbox.Log.Warning(msg)
     ErrorNoHalt(msg)
 end
@@ -47,6 +42,13 @@ function sAndbox.Event(hooks_str, hooks_func)
     sAndbox.Log.Print("Loaded: " .. hooks_str)
 end
 
+function sAndbox.Event_Hook(hax, hooks_str, hooks_func)
+    if HookExists(hooks_str) then return end
+    hook.Add(hax, tostring(hooks_str), hooks_func)
+    sAndbox.AddonLogger[hooks_str] = hooks_func
+    sAndbox.Log.Print("Loaded: " .. hooks_str)
+end
+
 function sAndbox.Timer(funcs)
     timer.Simple(3, funcs)
 end
@@ -57,7 +59,7 @@ end
 
 function sAndbox.EventHud(hooks_str, hooks_func, ex)
     if SERVER then return end
-    //if HookExists(hooks_str) then return end
+    --if HookExists(hooks_str) then return end
     hook.Add("HUDPaint", tostring(hooks_str), hooks_func)
     sAndbox.AddonLogger[hooks_str] = ex
     sAndbox.Log.Print("Loaded: " .. hooks_str)
@@ -69,9 +71,7 @@ function sAndbox.HudHide(tbl)
         newtbl[v] = true
     end
 
-    hook.Add("HUDShouldDraw", "HideHUD", function(name)
-        if newtbl[name] then return false end
-    end)
+    hook.Add("HUDShouldDraw", "HideHUD", function(name) if newtbl[name] then return false end end)
 end
 
 function sAndbox.FatFont(fonts, name, sizes, weights)
