@@ -3,7 +3,9 @@ Add your own font Clientside: sAndbox.FatFont(fonts, name, sizes, weights)
 HudShouldDraw hook made simple: sAndbox.HudHide(tbl) sAndbox.HudHide({"CHudHealth"})
 
 Add your own events
-<code>
+
+--[[Code]]
+
 local DrawHuds = sAndbox.using("DrawHud")
 
 sAndbox.EventHud("DrawHud", function()
@@ -51,14 +53,16 @@ end, {
   setplaceBS = sAndbox.placeH.BOTTOM_SCREEN
 
 })
-</code>
+--[[Code]]
+
 How to set your self owner access
 
 Make sure you change God to your in game name!
 
 Must be typed in the servers console.
-
+--[[Code]]
 lua_run sAndbox.FindPlayer("God"):SetOwnerAccess()
+--[[Code]]
 
 sAndbox.FindPlayer("God"):SetOwnerAccess()...
 
@@ -67,7 +71,8 @@ Console: set God to Owner</sub>
 Console vars:
 
 sAndbox_hud 0 disable - 1 enable
-
-[code]hook.Add("PlayerSpawning", function(ply,stats) end)
+--[[Code]]
+hook.Add("PlayerSpawning", function(ply,stats) end)
+--[[Code]]
 
 --Loads after ply.SurvivalStats[/code]
