@@ -23,7 +23,7 @@ if SERVER then
         return false
     end
 
-    function BluePrintUnlock(len, ply)
+    local function BluePrintUnlock(len, ply)
         local bp = net.ReadString()
         if ply:HasBluePrint(bp) then return end
         ply.GetBluePrint[bp] = true

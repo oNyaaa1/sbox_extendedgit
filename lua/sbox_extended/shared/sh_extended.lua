@@ -97,14 +97,20 @@ function sAndbox.AddSounds(name, sound2)
     sAndbox.TableSounds[name] = sound2
 end
 
-sAndbox.AddSounds("blip", "ui/blip.wav")
-sAndbox.AddSounds("piemenu_select", "ui/piemenu/piemenu_select.wav")
-sAndbox.AddSounds("piemenu_cancel", "ui/piemenu/piemenu_cancel.wav")
-sAndbox.AddSounds("piemenu_open", "ui/piemenu/piemenu_open.wav")
 function sAndbox.GetSounds(name)
     return sAndbox.TableSounds[name]
 end
 
+sAndbox.AddSounds("blip", "ui/blip.wav")
+sAndbox.AddSounds("piemenu_select", "ui/piemenu/piemenu_select.wav")
+sAndbox.AddSounds("piemenu_cancel", "ui/piemenu/piemenu_cancel.wav")
+sAndbox.AddSounds("piemenu_open", "ui/piemenu/piemenu_open.wav")
+sAndbox.AddSounds("ore_flare_hit", "farming/flare_hit.wav")
+sAndbox.AddSounds("hit_head", "combat/headshot.wav")
+sAndbox.AddSounds("tree_hit_1", "farming/tree_x_hit1.wav")
+sAndbox.AddSounds("tree_hit_2", "farming/tree_x_hit2.wav")
+sAndbox.AddSounds("tree_hit_3", "farming/tree_x_hit3.wav")
+sAndbox.AddSounds("tree_hit_4", "farming/tree_x_hit4.wav")
 sAndbox.Event("logger-info", function()
     return {
         {
@@ -129,3 +135,30 @@ sAndbox.Event("logger-info", function()
         end
     }
 end)
+
+local tblData = {}
+net.Receive("sAndbox_Secure_Data", function()
+    local str = net.ReadString()
+    local data = net.ReadFloat()
+    tblData[str] = data
+end)
+
+function client:GetHunger()
+    return tblData["Hunger"] == "Hunger" and tblData["Hunger"]
+end
+
+function client:GetThirst()
+    return tblData["Thirst"] == "Thirst" and tblData["Thirst"]
+end
+
+function client:GetTempature()
+    return tblData["Temperature"] == "Temperature" and tblData["Temperature"]
+end
+
+function client:GetRadiation()
+    return tblData["Radiation"] == "Radiation" and tblData["Radiation"]
+end
+
+function client:GetBleeding()
+    return tblData["Bleeding"] == "Bleeding" and tblData["Bleeding"]
+end

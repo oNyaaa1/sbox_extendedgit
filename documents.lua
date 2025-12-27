@@ -74,6 +74,18 @@ sAndbox_hud 0 disable - 1 enable
 
 hook.Add("PlayerSpawning", function(ply,stats) end)
 --Loads after ply.SurvivalStats
+
+function client:SetHunger(num)
+function client:SetThirst(num)
+function client:SetTemperature(num)
+function client:SetRadiation(num)
+function client:SetBleeding(num)
+
+returns client:GetHunger()
+returns client:GetThirst()
+returns client:GetTempature()
+returns client:GetRadiation()
+returns client:GetBleeding()
+
+
 ]]
-
-
