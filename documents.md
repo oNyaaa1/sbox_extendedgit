@@ -1,5 +1,4 @@
-\[code]
-
+***
 Add your own font Clientside: sAndbox.FatFont(fonts, name, sizes, weights) 
 
 HudShouldDraw hook made simple: sAndbox.HudHide(tbl) sAndbox.HudHide({"CHudHealth"})
@@ -54,8 +53,7 @@ end, {
 
 })
 
-\[/code]
-
+***
 \[code]
 
 How to set your self owner access
