@@ -54,6 +54,7 @@ end
 
 sAndbox.HudHide({"CHudHealth"})
 local DrawHuds = nil
+local showHud = CreateConVar("sAndbox_hud",0,{FCVAR_ARCHIVE})
 sAndbox.EventHud("DrawHud", function()
     return {
         {
@@ -68,11 +69,11 @@ sAndbox.EventHud("DrawHud", function()
         {
             Version = 1.0
         },
-        DrawHuds and sAndbox.ScreenHud(DrawHuds.setplaceLS, DrawHuds.setplaceBS, 1, 1, 200, 100, Color(51, 51, 51, 226)),
-        DrawHuds and sAndbox.ScreenText("sAndbox", DrawHuds.setplaceLS + 5, DrawHuds.setplaceBS + 2, 1, 1, 200, 100, Color(88, 176, 1)),
-        DrawHuds and sAndbox.ScreenText("Health: " .. tostring(LocalPlayer():Health()), DrawHuds.setplaceLS + 5, DrawHuds.setplaceBS + 2, 1, 1.02, 1, 1, Color(88, 176, 1)),
-        surface.SetDrawColor(255, 255, 255, 255),
-        surface.DrawOutlinedRect(DrawHuds.setplaceLS, DrawHuds.setplaceBS, 200, 100, 3),
+        showHud:GetBool() and DrawHuds and sAndbox.ScreenHud(DrawHuds.setplaceLS, DrawHuds.setplaceBS, 1, 1, 200, 100, Color(51, 51, 51, 226)),
+        showHud:GetBool() and DrawHuds and sAndbox.ScreenText("sAndbox", DrawHuds.setplaceLS + 5, DrawHuds.setplaceBS + 2, 1, 1, 200, 100, Color(88, 176, 1)),
+        showHud:GetBool() and DrawHuds and sAndbox.ScreenText("Health: " .. tostring(LocalPlayer():Health()), DrawHuds.setplaceLS + 5, DrawHuds.setplaceBS + 2, 1, 1.02, 1, 1, Color(88, 176, 1)),
+        showHud:GetBool() and DrawHuds and surface.SetDrawColor(255, 255, 255, 255),
+        showHud:GetBool() and DrawHuds and surface.DrawOutlinedRect(DrawHuds.setplaceLS, DrawHuds.setplaceBS, 200, 100, 3),
     }
 end, {
     setplaceLS = sAndbox.placeW.LEFT_SCREEN,
