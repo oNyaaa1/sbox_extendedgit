@@ -5,7 +5,6 @@ HudShouldDraw hook made simple: sAndbox.HudHide(tbl) sAndbox.HudHide({"CHudHealt
 Add your own events
 
 --[[Code]]
-
 local DrawHuds = sAndbox.using("DrawHud")
 
 sAndbox.EventHud("DrawHud", function()
