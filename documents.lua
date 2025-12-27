@@ -87,5 +87,18 @@ returns client:GetTempature()
 returns client:GetRadiation()
 returns client:GetBleeding()
 
+hook.Add("PlayerSpawning", function(ply,data)
+  ply:CreateInventory({}, 36)
+end)
+
+hook.Add("ScoreboardShow", "MyInventory", function()
+    sAndbox.InventoryMain()
+    return true
+end)
+
+hook.Add("ScoreboardHide", "MyInventory", function()
+    if IsValid(frame) then frame:Remove() end
+    return true
+end)
 
 ]]

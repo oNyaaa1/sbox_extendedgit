@@ -1,7 +1,6 @@
 sAndbox = sAndbox or {}
 local time = CurTime()
 /*
-Added more sounds
 
 */
 function FindShared(files)
@@ -44,7 +43,7 @@ function FindFiles(duh)
 		FindShared(v)
 	end
 end
-
+FindFiles("thirdparty")
 FindFiles("shared")
 FindFiles("server")
 FindFiles("client")

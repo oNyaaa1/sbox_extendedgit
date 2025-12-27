@@ -73,5 +73,6 @@ sAndbox.Event_Hook("PlayerInitialSpawn", "NoRankSet", function(ply)
     end)
 
     ply.SurvivalStats = {}
+    ply.InventoryGrid = {}
     hook.Call("PlayerSpawning", nil, ply, ply.SurvivalStats)
 end)
