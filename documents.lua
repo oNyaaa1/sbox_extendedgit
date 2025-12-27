@@ -3,7 +3,7 @@ Add your own font Clientside: sAndbox.FatFont(fonts, name, sizes, weights)
 HudShouldDraw hook made simple: sAndbox.HudHide(tbl) sAndbox.HudHide({"CHudHealth"})
 
 Add your own events
-
+<sub>
 local DrawHuds = sAndbox.using("DrawHud")
 
 sAndbox.EventHud("DrawHud", function()
@@ -51,7 +51,7 @@ end, {
   setplaceBS = sAndbox.placeH.BOTTOM_SCREEN
 
 })
-
+</sub>
 How to set your self owner access
 
 Make sure you change God to your in game name!
