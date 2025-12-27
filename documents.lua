@@ -65,13 +65,14 @@ lua_run sAndbox.FindPlayer("God"):SetOwnerAccess()
 
 sAndbox.FindPlayer("God"):SetOwnerAccess()...
 
-Console: set God to Owner</sub>
+Console: set God to Owner
 
 Console vars:
 
 sAndbox_hud 0 disable - 1 enable
 --[[Code]]
 hook.Add("PlayerSpawning", function(ply,stats) end)
+--Loads after ply.SurvivalStats[/code]
 --[[Code]]
 
---Loads after ply.SurvivalStats[/code]
+
