@@ -74,6 +74,6 @@ sAndbox_hud 0 disable - 1 enable
 
 hook.Add("PlayerSpawning", function(ply,stats) end)
 --Loads after ply.SurvivalStats
-Code]]
+]]
 
 
