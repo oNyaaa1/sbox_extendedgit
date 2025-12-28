@@ -98,7 +98,6 @@ hook.Add("CalcView", "EasyLookDown", function(ply, pos, angles, fov, znear, zfar
             if bonePos then eyePos = bonePos end
         end
 
-        -- Offset camera from eye position
         local bodyAngles = ply:GetAngles()
         local view = {
             origin = eyePos + (bodyAngles:Forward() * 5) + (bodyAngles:Up() * 13),
