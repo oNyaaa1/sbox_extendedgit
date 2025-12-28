@@ -54,7 +54,7 @@ end
 
 sAndbox.HudHide({"CHudHealth"})
 local DrawHuds = nil
-local showHud = CreateConVar("sAndbox_hud",0,{FCVAR_ARCHIVE})
+local showHud = CreateConVar("sAndbox_hud", 0, {FCVAR_ARCHIVE})
 sAndbox.EventHud("DrawHud", function()
     return {
         {
@@ -81,3 +81,31 @@ end, {
 })
 
 DrawHuds = sAndbox.using("DrawHud")
+hook.Add("CalcView", "EasyLookDown", function(ply, pos, angles, fov, znear, zfar)
+    if angles.p <= 82 then
+        local view = {
+            origin = pos,
+            angles = angles,
+            fov = fov,
+            drawviewer = false
+        }
+        return view
+    else
+        local eyeBone = ply:LookupBone("ValveBiped.Bip01_Head1") -- or try "eyes" if that doesn't work
+        local eyePos = pos
+        if eyeBone then
+            local bonePos, boneAng = ply:GetBonePosition(eyeBone)
+            if bonePos then eyePos = bonePos end
+        end
+
+        -- Offset camera from eye position
+        local bodyAngles = ply:GetAngles()
+        local view = {
+            origin = eyePos + (bodyAngles:Forward() * 5) + (bodyAngles:Up() * 13),
+            angles = angles,
+            fov = fov,
+            drawviewer = true,
+        }
+        return view
+    end
+end)

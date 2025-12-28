@@ -91,6 +91,8 @@ hook.Add("PlayerSpawning", function(ply,data)
   ply:CreateInventory({}, 36)
 end)
 
+sAndbox.pnl[number] // Parents panel
+
 hook.Add("ScoreboardShow", "MyInventory", function()
     sAndbox.InventoryMain()
     return true
@@ -101,4 +103,8 @@ hook.Add("ScoreboardHide", "MyInventory", function()
     return true
 end)
 
+--Pnl and the sAndbox.pnl
+hook.Call("LoadInventory", nil, pnl, sAndbox.pnl)
+
+sbox_keep_inventory -- Default 0 -- Do we keep inventory // 0 = false - 1 = true
 ]]

@@ -63,7 +63,12 @@ function client:SetBleeding(num)
     SendSecureData(self, "Bleeding", self.SurvivalStats["Bleeding"])
 end
 
-sAndbox.Event_Hook("PlayerInitialSpawn", "NoRankSet", function(ply)
+function client:RegisterPlayer(mdl)
+    self:SetModel(mdl)
+end
+
+sAndbox.KeepInventory = CreateConVar("sbox_keep_inventory", 0, {FCVAR_ARCHIVE})
+sAndbox.Event_Hook("PlayerSpawn", "NoRankSet", function(ply)
     --
     timer.Simple(2, function()
         -- 
@@ -72,7 +77,11 @@ sAndbox.Event_Hook("PlayerInitialSpawn", "NoRankSet", function(ply)
         end
     end)
 
-    ply.SurvivalStats = {}
-    ply.InventoryGrid = {}
+    if not sAndbox.KeepInventory then
+        ply.SurvivalStats = {}
+        ply.InventoryGrid = {}
+    end
+
+    ply:RegisterPlayer("models/player/breen.mdl")
     hook.Call("PlayerSpawning", nil, ply, ply.SurvivalStats)
 end)
