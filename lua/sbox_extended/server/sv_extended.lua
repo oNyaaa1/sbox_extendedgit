@@ -39,26 +39,31 @@ function client:SetOwnerAccess()
 end
 
 function client:SetHunger(num)
+    if not self.SurvivalStats then self.SurvivalStats = {} end
     self.SurvivalStats["Hunger"] = num
     SendSecureData(self, "Hunger", self.SurvivalStats["Hunger"])
 end
 
 function client:SetThirst(num)
+    if not self.SurvivalStats then self.SurvivalStats = {} end
     self.SurvivalStats["Thirst"] = num
     SendSecureData(self, "Thirst", self.SurvivalStats["Thirst"])
 end
 
 function client:SetTemperature(num)
+    if not self.SurvivalStats then self.SurvivalStats = {} end
     self.SurvivalStats["Temperature"] = num
     SendSecureData(self, "Temperature", self.SurvivalStats["Temperature"])
 end
 
 function client:SetRadiation(num)
+    if not self.SurvivalStats then self.SurvivalStats = {} end
     self.SurvivalStats["Radiation"] = num
     SendSecureData(self, "Radiation", self.SurvivalStats["Radiation"])
 end
 
 function client:SetBleeding(num)
+    if not self.SurvivalStats then self.SurvivalStats = {} end
     self.SurvivalStats["Bleeding"] = num
     SendSecureData(self, "Bleeding", self.SurvivalStats["Bleeding"])
 end

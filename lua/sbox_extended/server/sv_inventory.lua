@@ -9,9 +9,11 @@ function PLAYER:CreateInventory(item, gridsize)
 end
 
 function PLAYER:AddInventoryItem(item)
-    self.InventoryGrid[#self.InventoryGrid + 1] = {item}
+    if not self.Inventory then self.Inventory = {} end
+    self.Inventory[#self.Inventory + 1] = {item}
 end
 
 function PLAYER:CountInventory()
-    return #self.InventoryGrid
+    if not self.Inventory then self.InventoryGriInventoryd = {} end
+    return #self.Inventory
 end

@@ -1,6 +1,6 @@
 if SERVER then return end
 local frame = nil
-local inv_size = 1
+local inv_size = 24
 net.Receive("sAndbox_GridSize_Inventory", function()
     local GridSize = net.ReadTable()
     inv_size = GridSize[2]
@@ -18,10 +18,10 @@ function sAndbox.InventoryMain()
     frame:SetTitle("")
     frame:MakePopup()
 
-    frame.Paint = function(s, w, h) draw.RoundedBox(4, 0, 0, w, h, Color(0, 0, 0, 0)) end
+    frame.Paint = function(s, w, h) draw.RoundedBox(4, 0, 0, w, h, Color(0, 0, 0, 50)) end
     local pnl = vgui.Create("DPanel", frame)
     pnl:SetPos(x * 0.3, y * 0.3)
-    pnl:SetSize(602, 380)
+    pnl:SetSize(602, 420)
     pnl.Paint = function(s, w, h) draw.RoundedBox(4, 0, 0, w, h, Color(0, 0, 0, 0)) end
     local grid = vgui.Create("ThreeGrid", pnl)
     grid:Dock(FILL)
@@ -32,7 +32,7 @@ function sAndbox.InventoryMain()
     grid:SetVerticalMargin(2)
     for i = 1, inv_size do
         sAndbox.pnl[i] = vgui.Create("DPanel")
-        sAndbox.pnl[i]:SetTall(60)
+        sAndbox.pnl[i]:SetTall(100)
         sAndbox.pnl[i].Paint = function(s, w, h) draw.RoundedBox(4, 0, 0, w, h, Color(64, 64, 64, 200)) end
         grid:AddCell(sAndbox.pnl[i])
     end

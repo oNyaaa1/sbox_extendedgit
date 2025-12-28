@@ -141,24 +141,25 @@ net.Receive("sAndbox_Secure_Data", function()
     local str = net.ReadString()
     local data = net.ReadFloat()
     tblData[str] = data
+    print(tblData["Hunger"])
 end)
 
 function client:GetHunger()
-    return tblData["Hunger"] == "Hunger" and tblData["Hunger"]
+    return tblData["Hunger"]
 end
 
 function client:GetThirst()
-    return tblData["Thirst"] == "Thirst" and tblData["Thirst"]
+    return tblData["Thirst"]
 end
 
 function client:GetTempature()
-    return tblData["Temperature"] == "Temperature" and tblData["Temperature"]
+    return tblData["Temperature"]
 end
 
 function client:GetRadiation()
-    return tblData["Radiation"] == "Radiation" and tblData["Radiation"]
+    return tblData["Radiation"]
 end
 
 function client:GetBleeding()
-    return tblData["Bleeding"] == "Bleeding" and tblData["Bleeding"]
+    return tblData["Bleeding"]
 end
