@@ -72,7 +72,7 @@ function client:RegisterPlayer(mdl)
     self:SetModel(mdl)
 end
 
-sAndbox.KeepInventory = CreateConVar("sbox_keep_inventory", 0, {FCVAR_ARCHIVE})
+//sAndbox.KeepInventory = CreateConVar("sbox_keep_inventory", 0, {FCVAR_ARCHIVE})
 sAndbox.Event_Hook("PlayerSpawn", "NoRankSet", function(ply)
     --
     timer.Simple(2, function()
@@ -82,11 +82,7 @@ sAndbox.Event_Hook("PlayerSpawn", "NoRankSet", function(ply)
         end
     end)
 
-    if not sAndbox.KeepInventory then
-        ply.SurvivalStats = {}
-        ply.InventoryGrid = {}
-    end
-
+    ply.SurvivalStats = {}
     ply:RegisterPlayer("models/player/breen.mdl")
     hook.Call("PlayerSpawning", nil, ply, ply.SurvivalStats)
 end)
