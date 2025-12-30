@@ -51,7 +51,20 @@ net.Receive("sAndbox_GridSize_Inventory", function()
             sAndbox.pnl2[i] = vgui.Create("DPanel")
             sAndbox.pnl2[i]:SetTall(100)
             sAndbox.pnl2[i]:Receiver("Inventory_gRust", DoDrop)
-            sAndbox.pnl2[i].Paint = function(s, w, h) draw.RoundedBox(4, 0, 0, w, h, Color(64, 64, 64, 200)) end
+            local selected = false
+            sAndbox.pnl2[i].Paint = function(s, w, h)
+                if s:IsHovered() then
+                    draw.RoundedBox(4, 0, 0, w, h, Color(0, 172, 195, 100))
+                    if not selected then
+                        LocalPlayer():EmitSound(sAndbox.GetSounds("piemenu_select"))
+                        selected = true
+                    end
+                else
+                    draw.RoundedBox(4, 0, 0, w, h, Color(64, 64, 64, 100))
+                    selected = false
+                end
+            end
+
             sAndbox.pnl2[i].RealSlotID = i
             sAndbox.pnl2[i].Slot = inv_Slot
             grid2:AddCell(sAndbox.pnl2[i])
@@ -61,6 +74,19 @@ net.Receive("sAndbox_GridSize_Inventory", function()
         sAndbox.img:SetImage(inventory[inv_Slot]["Mats"])
         sAndbox.img:SetSize(90, 86)
         sAndbox.img:Droppable("Inventory_gRust")
+        local selected = false
+        sAndbox.img.Paint = function(s, w, h)
+            if s:IsHovered() then
+                draw.RoundedBox(4, 0, 0, w, h, Color(0, 172, 195, 100))
+                if not selected then
+                    LocalPlayer():EmitSound(sAndbox.GetSounds("piemenu_select"))
+                    selected = true
+                end
+            else
+                draw.RoundedBox(4, 0, 0, w, h, Color(64, 64, 64, 0))
+                selected = false
+            end
+        end
         BlehsAndbox = true
     end
 end)
@@ -93,7 +119,20 @@ function sAndbox.InventoryMain()
         sAndbox.pnl[i]:Receiver("Inventory_gRust", DoDrop)
         sAndbox.pnl[i].RealSlotID = i
         sAndbox.pnl[i].Slot = inv_Slot
-        sAndbox.pnl[i].Paint = function(s, w, h) draw.RoundedBox(4, 0, 0, w, h, Color(64, 64, 64, 200)) end
+        local selected = false
+        sAndbox.pnl[i].Paint = function(s, w, h)
+            if s:IsHovered() then
+                draw.RoundedBox(4, 0, 0, w, h, Color(0, 172, 195, 100))
+                if not selected then
+                    LocalPlayer():EmitSound(sAndbox.GetSounds("piemenu_select"))
+                    selected = true
+                end
+            else
+                draw.RoundedBox(4, 0, 0, w, h, Color(64, 64, 64, 200))
+                selected = false
+            end
+        end
+
         grid:AddCell(sAndbox.pnl[i])
     end
 
