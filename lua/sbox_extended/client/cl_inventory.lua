@@ -3,24 +3,37 @@ local frame = nil
 local inv_Slot = 1
 local inventory = nil
 local inventory2 = nil
-local BlehsAndbox = false
 sAndbox.tnkSlots = {}
 sAndbox.pnl2 = sAndbox.pnl2 or {}
-
-local function DoDrop(self, panels, bDoDrop, Command, x, y)
-    if bDoDrop then
-        for k, v in pairs(panels) do
-            v:SetParent(self)
-        end
+local function ClearSlot(slotID)
+    if slotID and sAndbox.img[slotID] then
+        sAndbox.img[slotID]:Remove()
+        sAndbox.img[slotID] = nil
     end
 end
 
+local function DoDrop(self, panels, bDoDrop, Command, x, y)
+    if bDoDrop then
+        local oldSlot = self.Slot
+        local newSlot = self.RealSlotID
+        ClearSlot(oldSlot)
+        panels[1]:SetParent(self)
+        net.Start("sAndbox_Inventory_SaveSlots")
+        net.WriteFloat(oldSlot)
+        net.WriteFloat(newSlot)
+        net.SendToServer()
+    end
+end
+
+net.Receive("sAndbox_GridSize_Inventory2", function()
+    local GridSize2 = net.ReadTable()
+    inventory2 = GridSize2
+end)
+
 net.Receive("sAndbox_GridSize_Inventory", function()
     local GridSize = net.ReadTable()
-    local GridSize2 = net.ReadTable()
     inv_Slot = net.ReadFloat()
     inventory = GridSize
-    inventory2 = GridSize2
     if not BlehsAndbox then
         local x, y = ScrW(), ScrH()
         sAndbox.pnl3 = vgui.Create("DPanel")
@@ -39,22 +52,18 @@ net.Receive("sAndbox_GridSize_Inventory", function()
             sAndbox.pnl2[i]:SetTall(100)
             sAndbox.pnl2[i]:Receiver("Inventory_gRust", DoDrop)
             sAndbox.pnl2[i].Paint = function(s, w, h) draw.RoundedBox(4, 0, 0, w, h, Color(64, 64, 64, 200)) end
+            sAndbox.pnl2[i].RealSlotID = i
+            sAndbox.pnl2[i].Slot = inv_Slot
             grid2:AddCell(sAndbox.pnl2[i])
         end
 
-        for k, v in pairs(inventory) do
-            if v.Mats == nil then continue end
-            local img = vgui.Create("DImageButton", sAndbox.pnl2[inv_Slot])
-            img:SetImage(v.Mats)
-            img:SetSize(90, 86)
-            img:Droppable("Inventory_gRust")
-        end
-
+        sAndbox.img = vgui.Create("DImageButton", sAndbox.pnl2[inv_Slot])
+        sAndbox.img:SetImage(inventory[inv_Slot]["Mats"])
+        sAndbox.img:SetSize(90, 86)
+        sAndbox.img:Droppable("Inventory_gRust")
         BlehsAndbox = true
     end
 end)
-
-
 
 function sAndbox.InventoryMain()
     sAndbox.pnl = {}
@@ -78,10 +87,12 @@ function sAndbox.InventoryMain()
     grid:SetColumns(6)
     grid:SetHorizontalMargin(2)
     grid:SetVerticalMargin(2)
-    for i = 1, inv_size or 24 do
+    for i = 7, 30 do
         sAndbox.pnl[i] = vgui.Create("DPanel")
         sAndbox.pnl[i]:SetTall(100)
         sAndbox.pnl[i]:Receiver("Inventory_gRust", DoDrop)
+        sAndbox.pnl[i].RealSlotID = i
+        sAndbox.pnl[i].Slot = inv_Slot
         sAndbox.pnl[i].Paint = function(s, w, h) draw.RoundedBox(4, 0, 0, w, h, Color(64, 64, 64, 200)) end
         grid:AddCell(sAndbox.pnl[i])
     end
