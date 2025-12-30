@@ -85,14 +85,8 @@ sAndbox.Event_Hook("PlayerSpawn", "NoRankSet", function(ply)
     if not ply.SurvivalStats then ply.SurvivalStats = {} end
     if not ply.Inventory then ply.Inventory = {} end
     if #ply.Inventory < 1 then
-        for i = 1, 24 do
+        for i = 1, 36 do
             ply.Inventory[i] = {}
-        end
-    end
-    if not ply.Inventory2 then ply.Inventory2 = {} end
-    if #ply.Inventory2 < 1 then
-        for i = 1, 6 do
-            ply.Inventory2[i] = {}
         end
     end
 

@@ -2,39 +2,33 @@ if SERVER then return end
 local frame = nil
 local inv_Slot = 1
 local inventory = nil
-local inventory2 = nil
 sAndbox.tnkSlots = {}
-sAndbox.pnl2 = sAndbox.pnl2 or {}
-local function ClearSlot(slotID)
-    if slotID and sAndbox.img[slotID] then
-        sAndbox.img[slotID]:Remove()
-        sAndbox.img[slotID] = nil
-    end
+sAndbox.img = {}
+local function ClearSlot(inv, slotID)
+    if sAndbox.img and IsValid(sAndbox.img[slotID]) then sAndbox.img[slotID]:Remove() end
 end
 
 local function DoDrop(self, panels, bDoDrop, Command, x, y)
-    if bDoDrop then
+    if bDoDrop and inventory ~= nil then
         local oldSlot = self.Slot
         local newSlot = self.RealSlotID
-        ClearSlot(oldSlot)
         panels[1]:SetParent(self)
+        ClearSlot(inventory, oldSlot)
         net.Start("sAndbox_Inventory_SaveSlots")
         net.WriteFloat(oldSlot)
         net.WriteFloat(newSlot)
+        net.WriteString(inventory and inventory["Weapon"] or "")
+        net.WriteString(inventory and inventory["Mats"] or "")
         net.SendToServer()
     end
 end
-
-net.Receive("sAndbox_GridSize_Inventory2", function()
-    local GridSize2 = net.ReadTable()
-    inventory2 = GridSize2
-end)
 
 net.Receive("sAndbox_GridSize_Inventory", function()
     local GridSize = net.ReadTable()
     inv_Slot = net.ReadFloat()
     inventory = GridSize
     if not BlehsAndbox then
+        sAndbox.pnl = {}
         local x, y = ScrW(), ScrH()
         sAndbox.pnl3 = vgui.Create("DPanel")
         sAndbox.pnl3:SetPos(x * 0.3, y * 0.88)
@@ -48,11 +42,11 @@ net.Receive("sAndbox_GridSize_Inventory", function()
         grid2:SetHorizontalMargin(2)
         grid2:SetVerticalMargin(2)
         for i = 1, 6 do
-            sAndbox.pnl2[i] = vgui.Create("DPanel")
-            sAndbox.pnl2[i]:SetTall(100)
-            sAndbox.pnl2[i]:Receiver("Inventory_gRust", DoDrop)
+            sAndbox.pnl[i] = vgui.Create("DPanel")
+            sAndbox.pnl[i]:SetTall(100)
+            sAndbox.pnl[i]:Receiver("Inventory_gRust", DoDrop)
             local selected = false
-            sAndbox.pnl2[i].Paint = function(s, w, h)
+            sAndbox.pnl[i].Paint = function(s, w, h)
                 if s:IsHovered() then
                     draw.RoundedBox(4, 0, 0, w, h, Color(0, 172, 195, 100))
                     if not selected then
@@ -65,34 +59,25 @@ net.Receive("sAndbox_GridSize_Inventory", function()
                 end
             end
 
-            sAndbox.pnl2[i].RealSlotID = i
-            sAndbox.pnl2[i].Slot = inv_Slot
-            grid2:AddCell(sAndbox.pnl2[i])
+            sAndbox.pnl[i].RealSlotID = i
+            sAndbox.pnl[i].Slot = inv_Slot
+            grid2:AddCell(sAndbox.pnl[i])
         end
 
-        sAndbox.img = vgui.Create("DImageButton", sAndbox.pnl2[inv_Slot])
-        sAndbox.img:SetImage(inventory[inv_Slot]["Mats"])
-        sAndbox.img:SetSize(90, 86)
-        sAndbox.img:Droppable("Inventory_gRust")
-        local selected = false
-        sAndbox.img.Paint = function(s, w, h)
-            if s:IsHovered() then
-                draw.RoundedBox(4, 0, 0, w, h, Color(0, 172, 195, 100))
-                if not selected then
-                    LocalPlayer():EmitSound(sAndbox.GetSounds("piemenu_select"))
-                    selected = true
-                end
-            else
-                draw.RoundedBox(4, 0, 0, w, h, Color(64, 64, 64, 0))
-                selected = false
-            end
+        if inventory and not howMany then
+            sAndbox.img = vgui.Create("DImageButton", sAndbox.pnl[inv_Slot])
+            sAndbox.img:SetImage(inventory["Mats"])
+            sAndbox.img:SetSize(90, 86)
+            sAndbox.img:Droppable("Inventory_gRust")
+            sAndbox.img.LastSlot = inv_Slot
+            howMany = true
         end
+
         BlehsAndbox = true
     end
 end)
 
 function sAndbox.InventoryMain()
-    sAndbox.pnl = {}
     if IsValid(frame) then frame:Remove() end
     local x, y = ScrW(), ScrH()
     frame = vgui.Create("DFrame")
@@ -136,6 +121,14 @@ function sAndbox.InventoryMain()
         grid:AddCell(sAndbox.pnl[i])
     end
 
-    hook.Call("LoadInventory", nil, pnl, sAndbox.pnl, sAndbox.pnl2, frame, inventory, inventory2, inv_Slot)
+    if sAndbox.pnl and sAndbox.img.LastSlot ~= inv_Slot then
+        sAndbox.img = vgui.Create("DImageButton", sAndbox.pnl[inv_Slot])
+        sAndbox.img:SetImage(inventory["Mats"])
+        sAndbox.img:SetSize(90, 86)
+        sAndbox.img:Droppable("Inventory_gRust")
+        sAndbox.img.LastSlot = inv_Slot
+    end
+
+    hook.Call("LoadInventory", nil, pnl, sAndbox.pnl, frame, inventory, inv_Slot)
     return frame
 end

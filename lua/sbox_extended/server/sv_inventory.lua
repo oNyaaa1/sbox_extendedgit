@@ -16,16 +16,22 @@ end
 net.Receive("sAndbox_Inventory_SaveSlots", function(len, pl)
     local oldslot = net.ReadFloat()
     local newslot = net.ReadFloat()
-    print(oldslot, newslot)
-    pl.Inventory[newslot] = {
-        Weapon = "rust_e_rock",
-        Mats = "ui/zohart/items/rock.png",
-    }
+    local wep = net.ReadString()
+    local mats = net.ReadString()
+    if mats ~= "" then
+        pl.Inventory[newslot] = {
+            {
+                Weapon = wep,
+                Mats = mats,
+            },
+        }
 
-    net.Start("sAndbox_GridSize_Inventory")
-    net.WriteTable(pl.Inventory[newslot])
-    net.WriteFloat(newslot)
-    net.Send(pl)
+        --pl.Inventory[oldslot] = {}
+        net.Start("sAndbox_GridSize_Inventory")
+        net.WriteTable(pl.Inventory[newslot][1])
+        net.WriteFloat(newslot)
+        net.Send(pl)
+    end
 end)
 
 function PLAYER:AddInventoryItem(item)
@@ -35,19 +41,7 @@ function PLAYER:AddInventoryItem(item)
     self:Give(item.Weapon)
     -- self:SelectWeapon(item.Weapon)
     net.Start("sAndbox_GridSize_Inventory")
-    net.WriteTable(self.Inventory[slot])
-    net.WriteFloat(slot)
-    net.Send(self)
-end
-
-function PLAYER:AddInventoryItem2(item)
-    local slot = self:FindSlot()
-    if slot == -1 then return end
-    self.Inventory2[slot] = {item}
-    self:Give(item.Weapon)
-    -- self:SelectWeapon(item.Weapon)
-    net.Start("sAndbox_GridSize_Inventory2")
-    net.WriteTable(self.Inventory2[slot])
+    net.WriteTable(self.Inventory[slot][1])
     net.WriteFloat(slot)
     net.Send(self)
 end
