@@ -1,23 +1,26 @@
 local PLAYER = FindMetaTable("Player")
 util.AddNetworkString("sAndbox_GridSize_Inventory")
 function PLAYER:FindSlot()
+    local num = -1
     for i = 1, #self.Inventory do
-        print(i)
-        if i ~= nil then return i end
+        if self.Inventory[i] then
+            num = i
+            break
+        end
     end
-    return -1
+    return num
 end
 
 function PLAYER:AddInventoryItem(item)
-    if not self.Inventory then self.Inventory = {} end
-    local slot = 1 --self:FindSlot()
+    local slot = self:FindSlot()
     if slot == -1 then return end
     self.Inventory[slot] = {item}
     self:Give(item.Weapon)
-    self:SelectWeapon(item.Weapon)
+    -- self:SelectWeapon(item.Weapon)
     net.Start("sAndbox_GridSize_Inventory")
     net.WriteTable(self.Inventory[slot])
-    net.WriteFloat(24)
+    net.WriteTable(self.Inventory2[slot])
+    net.WriteFloat(slot)
     net.Send(self)
 end
 
