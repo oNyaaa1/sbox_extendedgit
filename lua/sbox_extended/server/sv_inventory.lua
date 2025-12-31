@@ -2,6 +2,7 @@ local PLAYER = FindMetaTable("Player")
 util.AddNetworkString("sAndbox_GridSize_Inventory")
 util.AddNetworkString("sAndbox_GridSize_Inventory2")
 util.AddNetworkString("sAndbox_Inventory_SaveSlots")
+util.AddNetworkString("sAndbox_Inventory_Drop")
 function PLAYER:FindSlot()
     local num = -1
     for i = 1, #self.Inventory do
@@ -12,6 +13,7 @@ function PLAYER:FindSlot()
     end
     return num
 end
+
 
 net.Receive("sAndbox_Inventory_SaveSlots", function(len, pl)
     local oldslot = net.ReadFloat()
@@ -38,13 +40,58 @@ function PLAYER:AddInventoryItem(item)
     local slot = self:FindSlot()
     if slot == -1 then return end
     self.Inventory[slot] = {item}
-    self:Give(item.Weapon)
+    self:Give(item.Weapon or item)
     -- self:SelectWeapon(item.Weapon)
     net.Start("sAndbox_GridSize_Inventory")
     net.WriteTable(self.Inventory[slot][1])
     net.WriteFloat(slot)
+    net.WriteBool(true)
     net.Send(self)
 end
+
+function FindItemSlot(ply, item)
+    local num = -1
+    for i = 1, #ply.Inventory do
+        for k, v in pairs(ply.Inventory[i]) do
+            if item == v.Weapon then
+                num = i
+                break
+            end
+        end
+    end
+    return num
+end
+
+function PLAYER:RemoveInventoryItem(item)
+    local slot = FindItemSlot(self, item)
+    self.Inventory[slot] = {
+        {
+            Weapon = nil,
+            Mats = nil,
+        },
+    }
+
+    -- self:SelectWeapon(item.Weapon)
+    net.Start("sAndbox_GridSize_Inventory")
+    net.WriteTable(self.Inventory[slot][1])
+    net.WriteFloat(slot)
+    net.WriteBool(false)
+    net.Send(self)
+end
+
+net.Receive("sAndbox_Inventory_Drop", function(len, ply)
+    local item = net.ReadString()
+    local img = net.ReadString()
+    local ent = ents.Create("rust_item_drop")
+    ent:SetCount(1)
+    ent:SetItem(item)
+    ent:SetImage(img)
+    ent:SetPos(ply:GetPos() + ply:GetForward() * 32)
+    ent:Spawn()
+    ent:Activate()
+    ply:RemoveInventoryItem(item)
+end)
+
 
 function PLAYER:CountInventory()
     if not self.Inventory then self.Inventory = {} end
