@@ -90,6 +90,7 @@ sAndbox.Event_Hook("PlayerSpawn", "NoRankSet", function(ply)
         end
     end
 
+    ply:Give("rust_e_hands")
     ply:RegisterPlayer("models/player/breen.mdl")
     hook.Call("PlayerSpawning", nil, ply, ply.SurvivalStats)
 end)

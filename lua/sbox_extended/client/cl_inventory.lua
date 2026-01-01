@@ -10,6 +10,7 @@ local function ClearSlot(inv, slotID)
 end
 
 local function DropItem(inv, wep, mats)
+    if wep == nil and mats == nil then return end
     net.Start("sAndbox_Inventory_Drop")
     net.WriteString(wep)
     net.WriteString(mats)

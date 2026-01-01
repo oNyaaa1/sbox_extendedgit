@@ -14,7 +14,6 @@ function PLAYER:FindSlot()
     return num
 end
 
-
 net.Receive("sAndbox_Inventory_SaveSlots", function(len, pl)
     local oldslot = net.ReadFloat()
     local newslot = net.ReadFloat()
@@ -28,6 +27,8 @@ net.Receive("sAndbox_Inventory_SaveSlots", function(len, pl)
             },
         }
 
+        if newslot >= 7 and newslot <= 36 then pl:SelectWeapon("rust_e_hands") end
+        if newslot >= 1 and newslot <= 6 then pl:SelectWeapon(wep) end
         --pl.Inventory[oldslot] = {}
         net.Start("sAndbox_GridSize_Inventory")
         net.WriteTable(pl.Inventory[newslot][1])
@@ -36,16 +37,15 @@ net.Receive("sAndbox_Inventory_SaveSlots", function(len, pl)
     end
 end)
 
-function PLAYER:AddInventoryItem(item)
+function PLAYER:AddInventoryItem(item, bool)
     local slot = self:FindSlot()
     if slot == -1 then return end
     self.Inventory[slot] = {item}
     self:Give(item.Weapon or item)
-    -- self:SelectWeapon(item.Weapon)
     net.Start("sAndbox_GridSize_Inventory")
     net.WriteTable(self.Inventory[slot][1])
     net.WriteFloat(slot)
-    net.WriteBool(true)
+    net.WriteBool(bool)
     net.Send(self)
 end
 
@@ -71,7 +71,6 @@ function PLAYER:RemoveInventoryItem(item)
         },
     }
 
-    -- self:SelectWeapon(item.Weapon)
     net.Start("sAndbox_GridSize_Inventory")
     net.WriteTable(self.Inventory[slot][1])
     net.WriteFloat(slot)
@@ -90,8 +89,8 @@ net.Receive("sAndbox_Inventory_Drop", function(len, ply)
     ent:Spawn()
     ent:Activate()
     ply:RemoveInventoryItem(item)
+    ply:SelectWeapon("rust_e_hands")
 end)
-
 
 function PLAYER:CountInventory()
     if not self.Inventory then self.Inventory = {} end
