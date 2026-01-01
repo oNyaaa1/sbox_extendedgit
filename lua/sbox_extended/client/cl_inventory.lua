@@ -110,6 +110,8 @@ net.Receive("sAndbox_GridSize_Inventory", function()
 
         BlehsAndbox = true
     end
+
+    if sAndbox.pnl and sAndbox.pnl[inv_Slot] then sAndbox.pnl[inv_Slot].Weps = inventory["Weapon"] end
 end)
 
 function sAndbox.InventoryMain()
@@ -169,3 +171,14 @@ function sAndbox.InventoryMain()
     hook.Call("LoadInventory", nil, pnl, sAndbox.pnl, frame, inventory, inv_Slot)
     return frame
 end
+
+hook.Add("PlayerBindPress", "abcdeficounttothree", function(ply, bind, pressed)
+    local str_Find = string.find(bind, "slot")
+    local binds = string.gsub(bind, "slot", "")
+    local tonum = tonumber(binds)
+    if str_Find and sAndbox.pnl[tonum] ~= nil and sAndbox.pnl[tonum].Weps ~= nil then
+        net.Start("sAndbox_Inventory_SelectWeapon")
+        net.WriteString(sAndbox.pnl[tonum].Weps)
+        net.SendToServer()
+    end
+end)
