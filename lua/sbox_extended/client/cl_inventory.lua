@@ -26,6 +26,10 @@ local function DoDrop(self, panels, bDoDrop, Command, x, y)
     if bDoDrop and inventory ~= nil and self:GetParent():GetClassName() ~= "CGModBase" then
         local oldSlot = self.Slot
         local newSlot = self.RealSlotID
+        if newSlot >= 6 and newSlot <= 36 then
+            sAndbox.pnl[oldSlot].Slot = newSlot
+        end
+
         panels[1]:SetParent(self)
         ClearSlot(inventory, oldSlot)
         net.Start("sAndbox_Inventory_SaveSlots")
@@ -42,7 +46,7 @@ net.Receive("sAndbox_GridSize_Inventory", function()
     inv_Slot = net.ReadFloat()
     local token = net.ReadBool()
     inventory = GridSize
-    if token then
+    if sAndbox.pnl[inv_Slot] and token then
         sAndbox.img = vgui.Create("DImageButton", sAndbox.pnl[inv_Slot])
         sAndbox.img:SetImage(inventory["Mats"])
         sAndbox.img:SetSize(90, 86)

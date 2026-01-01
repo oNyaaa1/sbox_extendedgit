@@ -4,11 +4,11 @@ util.AddNetworkString("sAndbox_GridSize_Inventory2")
 util.AddNetworkString("sAndbox_Inventory_SaveSlots")
 util.AddNetworkString("sAndbox_Inventory_Drop")
 util.AddNetworkString("sAndbox_Inventory_SelectWeapon")
-
-net.Receive("sAndbox_Inventory_SelectWeapon",function(len,pl)
+net.Receive("sAndbox_Inventory_SelectWeapon", function(len, pl)
     local str_Wep = net.ReadString()
     pl:SelectWeapon(str_Wep)
 end)
+
 function PLAYER:FindSlot()
     local num = -1
     for i = 1, #self.Inventory do

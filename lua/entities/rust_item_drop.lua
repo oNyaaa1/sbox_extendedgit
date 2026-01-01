@@ -42,8 +42,8 @@ function ENT:Use(act, ply)
     ply:AddInventoryItem({
         Weapon = self:GetItem(),
         Mats = self:GetImage(),
-    },true)
-    ply:SelectWeapon(self:GetItem())
+    }, true)
 
+    ply:SelectWeapon(self:GetItem())
     self:Remove()
 end
