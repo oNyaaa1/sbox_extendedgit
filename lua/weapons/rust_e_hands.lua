@@ -7,7 +7,7 @@ SWEP.DrawCrosshair = false
 
 function SWEP:Initialize()
 
-    self:SetHoldType("none")
+    self:SetHoldType("normal")
 
 end
 

@@ -74,7 +74,7 @@ function sAndbox.HudHide(tbl)
     hook.Add("HUDShouldDraw", "HideHUD", function(name) if newtbl[name] then return false end end)
 end
 
-function sAndbox.BuildingPrev(ply, tc, radius)
+function sAndbox.BuildingPrev(ply, tc)
     if not IsValid(ply) or not IsValid(tc) then return false end
     local TC_RADIUS = 30 -- meters
     local TC_RADIUS_SQR = TC_RADIUS * TC_RADIUS -- 900
@@ -161,4 +161,34 @@ end
 
 function client:GetBleeding()
     return tblData and tblData["Bleeding"] or 0
+end
+
+local function ENUM_LOOK_AT(side)
+    if side >= 225 and side <= 315 then
+        -- SW - W - NW
+        return Vector(0, 125, 0)
+    elseif side >= 315 and side <= 45 then
+        -- NW - NE
+        return Vector(125, 0, 0)
+    elseif side >= 60 and side <= 120 then
+        --NE - SE
+        return Vector(0, -125, 0)
+    elseif side >= 135 and side <= 225 then
+        -- SE - SW
+        return Vector(-125, 0, 0)
+    end
+    return Vector(125, 0, 0)
+end
+
+local positions = {
+    ["sent_foundation"] = function(ply)
+        local text = math.Round(360 - ((ply:GetAngles().y - 360) % 360))
+        return ENUM_LOOK_AT(text)
+    end
+}
+
+local ENTITY = FindMetaTable("Entity")
+function ENTITY:FindSocketAdvanced(ply)
+    local pos = positions[sAndbox.Selected or "sent_foundation"](ply)
+    return pos
 end

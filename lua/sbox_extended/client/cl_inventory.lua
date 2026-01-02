@@ -27,7 +27,13 @@ local function DoDrop(self, panels, bDoDrop, Command, x, y)
         local oldSlot = self.Slot
         local newSlot = self.RealSlotID
         if newSlot >= 6 and newSlot <= 36 then
-            sAndbox.pnl[oldSlot].Slot = newSlot
+            --sAndbox.pnl[oldSlot].Slot = newSlot
+            sAndbox.pnl[oldSlot].Weps = nil
+        end
+
+        if newSlot >= 1 and newSlot <= 6 then
+            --sAndbox.pnl[oldSlot].Slot = newSlot
+            sAndbox.pnl[newSlot].Weps = inventory["Weapon"]
         end
 
         panels[1]:SetParent(self)

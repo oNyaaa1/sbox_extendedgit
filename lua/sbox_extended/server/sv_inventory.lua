@@ -10,14 +10,10 @@ net.Receive("sAndbox_Inventory_SelectWeapon", function(len, pl)
 end)
 
 function PLAYER:FindSlot()
-    local num = -1
     for i = 1, #self.Inventory do
-        if self.Inventory[i] then
-            num = i
-            break
-        end
+        if not self.Inventory[i] or self.Inventory[i].Slot == nil then return i end
     end
-    return num
+    return -1
 end
 
 net.Receive("sAndbox_Inventory_SaveSlots", function(len, pl)
@@ -30,6 +26,7 @@ net.Receive("sAndbox_Inventory_SaveSlots", function(len, pl)
             {
                 Weapon = wep,
                 Mats = mats,
+                Slot = newslot,
             },
         }
 
@@ -46,7 +43,11 @@ end)
 function PLAYER:AddInventoryItem(item, bool)
     local slot = self:FindSlot()
     if slot == -1 then return end
-    self.Inventory[slot] = {item}
+    self.Inventory[slot] = {
+        item,
+        Slot = slot
+    }
+
     self:Give(item.Weapon or item)
     net.Start("sAndbox_GridSize_Inventory")
     net.WriteTable(self.Inventory[slot][1])
