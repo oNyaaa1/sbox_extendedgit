@@ -166,29 +166,65 @@ end
 local function ENUM_LOOK_AT(side)
     if side >= 225 and side <= 315 then
         -- SW - W - NW
-        return Vector(0, 125, 0)
+        return 1
     elseif side >= 315 and side <= 45 then
         -- NW - NE
-        return Vector(125, 0, 0)
+        return 2
     elseif side >= 60 and side <= 120 then
         --NE - SE
-        return Vector(0, -125, 0)
+        return 3
     elseif side >= 135 and side <= 225 then
         -- SE - SW
-        return Vector(-125, 0, 0)
+        return 4
     end
-    return Vector(125, 0, 0)
+    return 2
 end
 
 local positions = {
     ["sent_foundation"] = function(ply)
         local text = math.Round(360 - ((ply:GetAngles().y - 360) % 360))
-        return ENUM_LOOK_AT(text)
+        local num = ENUM_LOOK_AT(text)
+        if num == 1 then return Vector(0, 125, 0) end
+        if num == 2 then return Vector(125, 0, 0) end
+        if num == 3 then return Vector(0, -125, 0) end
+        if num == 4 then return Vector(-125, 0, 0) end
+    end,
+    ["sent_wall"] = function(ply)
+        local text = math.Round(360 - ((ply:GetAngles().y - 360) % 360))
+        local num = ENUM_LOOK_AT(text)
+        if num == 1 then return Vector(0, 62, 0), 0 end
+        if num == 2 then return Vector(62, 0, 0), 90 end
+        if num == 3 then return Vector(0, -62, 0), 0 end
+        if num == 4 then return Vector(-62, 0, 0), 90 end
+    end,
+    ["sent_doorway"] = function(ply)
+        local text = math.Round(360 - ((ply:GetAngles().y - 360) % 360))
+        local num = ENUM_LOOK_AT(text)
+        if num == 1 then return Vector(0, 62, 0), 0 end
+        if num == 2 then return Vector(62, 0, 0), 90 end
+        if num == 3 then return Vector(0, -62, 0), 0 end
+        if num == 4 then return Vector(-62, 0, 0), 90 end
+    end,
+    ["sent_ceiling"] = function(ply)
+        local text = math.Round(360 - ((ply:GetAngles().y - 360) % 360))
+        local num = ENUM_LOOK_AT(text)
+        if num == 1 then return Vector(0, 0, 125), 0 end
+        if num == 2 then return Vector(0, 0, 125), 0 end
+        if num == 3 then return Vector(0, 0, 125), 0 end
+        if num == 4 then return Vector(0, 0, 125), 0 end
+    end,
+    ["sent_door"] = function(ply)
+        local text = math.Round(360 - ((ply:GetAngles().y - 360) % 360))
+        local num = ENUM_LOOK_AT(text)
+        if num == 1 then return Vector(0, 62, 0), 90 end
+        if num == 2 then return Vector(62, 0, 0), 0 end
+        if num == 3 then return Vector(0, -62, 0), 90 end
+        if num == 4 then return Vector(-62, 0, 0), 0 end
     end
 }
 
 local ENTITY = FindMetaTable("Entity")
-function ENTITY:FindSocketAdvanced(ply)
-    local pos = positions[sAndbox.Selected or "sent_foundation"](ply)
-    return pos
+function ENTITY:FindSocketAdvanced(ply, need)
+    local pos, ang = positions[need](ply)
+    return pos, ang
 end
