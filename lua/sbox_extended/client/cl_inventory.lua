@@ -1,16 +1,21 @@
 if SERVER then return end
 local frame = nil
 local inv_Slot = 1
-local inventory = inventory or nil
+local inventory = nil
 sAndbox.tnkSlots = {}
 sAndbox.img = {}
 sAndbox.pnl = {}
+local BlehsAndbox = false
+local howMany = false
 local function ClearSlot(inv, slotID)
-    if sAndbox.img and IsValid(sAndbox.img[slotID]) then sAndbox.img[slotID]:Remove() end
+    if sAndbox.img[slotID] and IsValid(sAndbox.img[slotID]) then
+        sAndbox.img[slotID]:Remove()
+        sAndbox.img[slotID] = nil
+    end
 end
 
 local function DropItem(inv, wep, mats)
-    if wep == nil and mats == nil then return end
+    if wep == nil or mats == nil then return end
     net.Start("sAndbox_Inventory_Drop")
     net.WriteString(wep)
     net.WriteString(mats)
@@ -18,31 +23,58 @@ local function DropItem(inv, wep, mats)
 end
 
 local function DoDrop(self, panels, bDoDrop, Command, x, y)
-    if bDoDrop and self:GetParent():GetClassName() == "CGModBase" then --
-        DropItem(inventory, inventory["Weapon"], inventory["Mats"])
-        panels[1]:Remove()
+    if not bDoDrop or not panels[1] then return end
+    -- Dropping outside inventory (to ground)
+    if self:GetParent():GetClassName() == "CGModBase" then
+        if panels[1].InventoryData then
+            DropItem(nil, panels[1].InventoryData.Weapon, panels[1].InventoryData.Mats)
+            panels[1]:Remove()
+        end
+        return
     end
 
-    if bDoDrop and inventory ~= nil and self:GetParent():GetClassName() ~= "CGModBase" then
-        local oldSlot = self.Slot
+    -- Moving items between slots
+    if self:GetParent():GetClassName() ~= "CGModBase" and panels[1].CurrentSlot then
+        local oldSlot = panels[1].CurrentSlot
         local newSlot = self.RealSlotID
-        if newSlot >= 6 and newSlot <= 36 then
-            --sAndbox.pnl[oldSlot].Slot = newSlot
-            sAndbox.pnl[oldSlot].Weps = nil
+        if not oldSlot or not newSlot or oldSlot == newSlot then return end
+        local itemData = panels[1].InventoryData
+        if not itemData then return end
+        -- Check if new slot has an item (for swapping)
+        local swapImage = sAndbox.img[newSlot]
+        local hasSwapItem = IsValid(swapImage) and swapImage.InventoryData
+        -- Update weapon references
+        if oldSlot >= 1 and oldSlot <= 6 and IsValid(sAndbox.pnl[oldSlot]) then
+            if hasSwapItem then
+                sAndbox.pnl[oldSlot].Weps = swapImage.InventoryData.Weapon
+            else
+                sAndbox.pnl[oldSlot].Weps = nil
+            end
         end
 
-        if newSlot >= 1 and newSlot <= 6 then
-            --sAndbox.pnl[oldSlot].Slot = newSlot
-            sAndbox.pnl[newSlot].Weps = inventory["Weapon"]
-        end
-
+        if newSlot >= 1 and newSlot <= 6 and IsValid(sAndbox.pnl[newSlot]) then sAndbox.pnl[newSlot].Weps = itemData.Weapon end
+        -- Move the dragged item to new parent
         panels[1]:SetParent(self)
-        ClearSlot(inventory, oldSlot)
+        panels[1].CurrentSlot = newSlot
+        -- Handle swap if there's an item in the target slot
+        if hasSwapItem then
+            -- Move swapped item to old slot
+            swapImage:SetParent(sAndbox.pnl[oldSlot])
+            swapImage.CurrentSlot = oldSlot
+            sAndbox.img[oldSlot] = swapImage
+        else
+            -- Clear old slot reference if no swap
+            sAndbox.img[oldSlot] = nil
+        end
+
+        -- Update new slot reference
+        sAndbox.img[newSlot] = panels[1]
+        -- Send to server
         net.Start("sAndbox_Inventory_SaveSlots")
         net.WriteFloat(oldSlot)
         net.WriteFloat(newSlot)
-        net.WriteString(inventory and inventory["Weapon"] or "")
-        net.WriteString(inventory and inventory["Mats"] or "")
+        net.WriteString(itemData.Weapon or "")
+        net.WriteString(itemData.Mats or "")
         net.SendToServer()
     end
 end
@@ -52,14 +84,26 @@ net.Receive("sAndbox_GridSize_Inventory", function()
     inv_Slot = net.ReadFloat()
     local token = net.ReadBool()
     inventory = GridSize
-    if sAndbox.pnl[inv_Slot] and token then
-        sAndbox.img = vgui.Create("DImageButton", sAndbox.pnl[inv_Slot])
-        sAndbox.img:SetImage(inventory["Mats"])
-        sAndbox.img:SetSize(90, 86)
-        sAndbox.img:Droppable("Inventory_gRust")
-        sAndbox.img.LastSlot = inv_Slot
+    -- Update existing slot or create new item
+    if sAndbox.pnl[inv_Slot] and IsValid(sAndbox.pnl[inv_Slot]) and token and inventory["Mats"] then
+        -- Clear old image if exists
+        if IsValid(sAndbox.img[inv_Slot]) then sAndbox.img[inv_Slot]:Remove() end
+        -- Create new image
+        sAndbox.img[inv_Slot] = vgui.Create("DImageButton", sAndbox.pnl[inv_Slot])
+        sAndbox.img[inv_Slot]:SetImage(inventory["Mats"])
+        sAndbox.img[inv_Slot]:SetSize(90, 86)
+        sAndbox.img[inv_Slot]:Droppable("Inventory_gRust")
+        sAndbox.img[inv_Slot].CurrentSlot = inv_Slot
+        sAndbox.img[inv_Slot].InventoryData = {
+            Weapon = inventory["Weapon"],
+            Mats = inventory["Mats"]
+        }
+    elseif not token then
+        -- Remove item if token is false
+        ClearSlot(inventory, inv_Slot)
     end
 
+    -- Create hotbar (slots 1-6) if it doesn't exist
     if not BlehsAndbox then
         sAndbox.pnl = {}
         local x, y = ScrW(), ScrH()
@@ -68,12 +112,10 @@ net.Receive("sAndbox_GridSize_Inventory", function()
         frame2:Dock(BOTTOM)
         frame2:SetSize(0, 200)
         frame2:SetTitle("")
+        frame2:ShowCloseButton(false)
+        frame2:SetSizable(false)
+        frame2:SetDraggable(false)
         frame2:Receiver("Inventory_gRust", DoDrop)
-        if IsValid(frame2.btnClose) then frame2.btnClose:Hide() end
-        if IsValid(frame2.btnMaxim) then frame2.btnMaxim:Hide() end
-        if IsValid(frame2.btnMinim) then frame2.btnMinim:Hide() end
-        if IsValid(frame2) then frame2:SetSizable(false) end
-        if IsValid(frame2) then frame2:SetDraggable(false) end
         frame2.Paint = function(s, w, h) draw.RoundedBox(4, 0, 0, w, h, Color(0, 0, 0, 0)) end
         sAndbox.pnl3 = vgui.Create("DPanel", frame2)
         sAndbox.pnl3:SetPos(x * 0.3, y * 0.1)
@@ -90,6 +132,7 @@ net.Receive("sAndbox_GridSize_Inventory", function()
             sAndbox.pnl[i] = vgui.Create("DPanel")
             sAndbox.pnl[i]:SetTall(100)
             sAndbox.pnl[i]:Receiver("Inventory_gRust", DoDrop)
+            sAndbox.pnl[i].RealSlotID = i
             local selected = false
             sAndbox.pnl[i].Paint = function(s, w, h)
                 if s:IsHovered() then
@@ -104,27 +147,19 @@ net.Receive("sAndbox_GridSize_Inventory", function()
                 end
             end
 
-            sAndbox.pnl[i].RealSlotID = i
-            sAndbox.pnl[i].Slot = inv_Slot
             grid2:AddCell(sAndbox.pnl[i])
-        end
-
-        if inventory and not howMany then
-            sAndbox.img = vgui.Create("DImageButton", sAndbox.pnl[inv_Slot])
-            sAndbox.img:SetImage(inventory["Mats"])
-            sAndbox.img:SetSize(90, 86)
-            sAndbox.img:Droppable("Inventory_gRust")
-            sAndbox.img.LastSlot = inv_Slot
-            howMany = true
         end
 
         BlehsAndbox = true
     end
 
-    if sAndbox.pnl and sAndbox.pnl[inv_Slot] then sAndbox.pnl[inv_Slot].Weps = inventory["Weapon"] end
+    if IsValid(sAndbox.pnl[inv_Slot]) and inventory["Weapon"] then sAndbox.pnl[inv_Slot].Weps = inventory["Weapon"] end
 end)
 
 function sAndbox.InventoryMain()
+    net.Start("sAndbox_Inventory_RequestAll")
+    net.SendToServer()
+    
     if IsValid(frame) then frame:Remove() end
     local x, y = ScrW(), ScrH()
     frame = vgui.Create("DFrame")
@@ -148,11 +183,15 @@ function sAndbox.InventoryMain()
     grid:SetHorizontalMargin(2)
     grid:SetVerticalMargin(2)
     for i = 7, 30 do
+        -- Store existing image before creating new panel
+        local existingImage = sAndbox.img[i]
+        local existingData = nil
+        if IsValid(existingImage) then existingData = existingImage.InventoryData end
+        -- Create or recreate panel
         sAndbox.pnl[i] = vgui.Create("DPanel")
         sAndbox.pnl[i]:SetTall(100)
         sAndbox.pnl[i]:Receiver("Inventory_gRust", DoDrop)
         sAndbox.pnl[i].RealSlotID = i
-        sAndbox.pnl[i].Slot = inv_Slot
         local selected = false
         sAndbox.pnl[i].Paint = function(s, w, h)
             if s:IsHovered() then
@@ -168,25 +207,27 @@ function sAndbox.InventoryMain()
         end
 
         grid:AddCell(sAndbox.pnl[i])
+        -- Restore existing item if it was there
+        if existingData then
+            sAndbox.img[i] = vgui.Create("DImageButton", sAndbox.pnl[i])
+            sAndbox.img[i]:SetImage(existingData.Mats)
+            sAndbox.img[i]:SetSize(90, 86)
+            sAndbox.img[i]:Droppable("Inventory_gRust")
+            sAndbox.img[i].CurrentSlot = i
+            sAndbox.img[i].InventoryData = existingData
+        end
     end
 
-    if inventory and sAndbox.pnl and sAndbox.img.LastSlot ~= inv_Slot and inventory["Mats"] ~= nil then
-        sAndbox.img = vgui.Create("DImageButton", sAndbox.pnl[inv_Slot])
-        sAndbox.img:SetImage(inventory["Mats"])
-        sAndbox.img:SetSize(90, 86)
-        sAndbox.img:Droppable("Inventory_gRust")
-        sAndbox.img.LastSlot = inv_Slot
-    end
-
-    hook.Call("LoadInventory", nil, pnl, sAndbox.pnl, frame, inventory, inv_Slot)
+    hook.Call("LoadInventory", nil, sAndbox.pnl, sAndbox.pnl, frame, inventory, inv_Slot)
     return frame
 end
 
-hook.Add("PlayerBindPress", "abcdeficounttothree", function(ply, bind, pressed)
+hook.Add("PlayerBindPress", "sAndbox_InventoryHotkeys", function(ply, bind, pressed)
     local str_Find = string.find(bind, "slot")
+    if not str_Find then return end
     local binds = string.gsub(bind, "slot", "")
     local tonum = tonumber(binds)
-    if str_Find and sAndbox.pnl[tonum] ~= nil and sAndbox.pnl[tonum].Weps ~= nil then
+    if tonum and sAndbox.pnl[tonum] and IsValid(sAndbox.pnl[tonum]) and sAndbox.pnl[tonum].Weps then
         net.Start("sAndbox_Inventory_SelectWeapon")
         net.WriteString(sAndbox.pnl[tonum].Weps)
         net.SendToServer()
