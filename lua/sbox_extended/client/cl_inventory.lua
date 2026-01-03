@@ -79,11 +79,17 @@ local function DoDrop(self, panels, bDoDrop, Command, x, y)
     end
 end
 
+net.Receive("DAtaSendGrust", function()
+    net.Start("sAndbox_Inventory_RequestAll")
+    net.SendToServer()
+end)
+
 net.Receive("sAndbox_GridSize_Inventory", function()
     local GridSize = net.ReadTable()
     inv_Slot = net.ReadFloat()
     local token = net.ReadBool()
     inventory = GridSize
+    
     -- Update existing slot or create new item
     if sAndbox.pnl[inv_Slot] and IsValid(sAndbox.pnl[inv_Slot]) and token and inventory["Mats"] then
         -- Clear old image if exists
@@ -159,7 +165,6 @@ end)
 function sAndbox.InventoryMain()
     net.Start("sAndbox_Inventory_RequestAll")
     net.SendToServer()
-    
     if IsValid(frame) then frame:Remove() end
     local x, y = ScrW(), ScrH()
     frame = vgui.Create("DFrame")
