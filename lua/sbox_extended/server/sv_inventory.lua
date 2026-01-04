@@ -5,10 +5,8 @@ util.AddNetworkString("sAndbox_Inventory_SaveSlots")
 util.AddNetworkString("sAndbox_Inventory_Drop")
 util.AddNetworkString("sAndbox_Inventory_SelectWeapon")
 util.AddNetworkString("sAndbox_Inventory_RequestAll")
-
 net.Receive("sAndbox_Inventory_RequestAll", function(len, pl)
     if not IsValid(pl) or not pl.Inventory then return end
-    
     -- Send all inventory items to client
     for i = 1, 36 do
         if pl.Inventory[i] and pl.Inventory[i].Weapon then
@@ -123,6 +121,8 @@ function PLAYER:AddInventoryItem(item, bool, slot)
     net.WriteFloat(slot)
     net.WriteBool(bool ~= false) -- Default to true
     net.Send(self)
+    net.Start("DAtaSendGrust")
+    net.Send(self)
 end
 
 function FindItemSlot(ply, item)
@@ -149,6 +149,37 @@ function PLAYER:RemoveInventoryItem(item)
 
     net.WriteFloat(slot)
     net.WriteBool(false)
+    net.Send(self)
+    net.Start("DAtaSendGrust")
+    net.Send(self)
+end
+
+function PLAYER:LoadInventoryItem(item, bool, slot)
+    self.Inventory = nil
+    net.Start("DAtaSendGrust")
+    net.Send(self)
+    if not self.Inventory then self.Inventory = {} end
+    slot = slot or self:FindSlot()
+    if slot == -1 then
+        slot = 7 -- Default to first storage slot
+    end
+
+    -- Store item data
+    self.Inventory[slot] = {
+        Weapon = item.Weapon or item,
+        Mats = item.Mats,
+        Slot = slot,
+    }
+
+    -- Give weapon to player
+    self:Give(item.Weapon or item)
+    -- Send to client
+    net.Start("sAndbox_GridSize_Inventory")
+    net.WriteTable(self.Inventory[slot])
+    net.WriteFloat(slot)
+    net.WriteBool(bool ~= false) -- Default to true
+    net.Send(self)
+    net.Start("DAtaSendGrust")
     net.Send(self)
 end
 
