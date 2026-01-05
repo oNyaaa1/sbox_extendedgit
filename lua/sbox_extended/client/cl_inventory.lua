@@ -98,6 +98,7 @@ net.Receive("sAndbox_GridSize_Inventory", function()
         sAndbox.img[inv_Slot] = vgui.Create("DImageButton", sAndbox.pnl[inv_Slot])
         sAndbox.img[inv_Slot]:SetImage(inventory["Mats"])
         sAndbox.img[inv_Slot]:SetSize(90, 86)
+        sAndbox.img[inv_Slot]:SetCursor("hand")
         sAndbox.img[inv_Slot]:Droppable("Inventory_gRust")
         sAndbox.img[inv_Slot].CurrentSlot = inv_Slot
         sAndbox.img[inv_Slot].InventoryData = {
@@ -217,6 +218,7 @@ function sAndbox.InventoryMain()
             sAndbox.img[i] = vgui.Create("DImageButton", sAndbox.pnl[i])
             sAndbox.img[i]:SetImage(existingData.Mats)
             sAndbox.img[i]:SetSize(90, 86)
+            sAndbox.img[i]:SetCursor("hand")
             sAndbox.img[i]:Droppable("Inventory_gRust")
             sAndbox.img[i].CurrentSlot = i
             sAndbox.img[i].InventoryData = existingData
