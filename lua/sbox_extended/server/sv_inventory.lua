@@ -99,18 +99,20 @@ net.Receive("sAndbox_Inventory_SaveSlots", function(len, pl)
     net.Send(pl)
 end)
 
-function PLAYER:AddInventoryItem(item, bool, slot)
+function PLAYER:AddInventoryItem(item, bool, amount, slot)
     if not self.Inventory then self.Inventory = {} end
     slot = slot or self:FindSlot()
     if slot == -1 then
         slot = 7 -- Default to first storage slot
     end
 
+    local itemz = ITEMS:GetItem(item.Weapon)
     -- Store item data
     self.Inventory[slot] = {
         Weapon = item.Weapon or item,
-        Mats = item.Mats,
+        Mats = itemz.model,
         Slot = slot,
+        amount = amount or 1,
     }
 
     -- Give weapon to player
@@ -125,12 +127,47 @@ function PLAYER:AddInventoryItem(item, bool, slot)
     net.Send(self)
 end
 
+--[[
+
 function FindItemSlot(ply, item)
     if not ply.Inventory then return -1 end
     for i = 1, 36 do
         if ply.Inventory[i] and ply.Inventory[i].Weapon == item then return i end
     end
     return -1
+end
+]]
+function PLAYER:FindItemSlot(item)
+    local itemz = ITEMS:GetItem(item)
+    for k, v in pairs(self.Inventory) do
+        if v.Weapon == item and v.amount <= itemz.StackSize then return v.Slot end
+    end
+    return 7
+end
+
+function PLAYER:ExistingInventoryItem(item, amount)
+    if not self.Inventory then self.Inventory = {} end
+    local itemslot = self:FindItemSlot(item.Weapon)
+    local itemz = ITEMS:GetItem(item.Weapon)
+    self:SetPData(item.Weapon, tonumber(self:GetPData(item.Weapon, 0) + amount))
+    self.Inventory[itemslot] = {
+        Weapon = item.Weapon or item,
+        Mats = itemz.model,
+        Slot = itemslot,
+        amount = tonumber(self:GetPData(item.Weapon, 0)),
+    }
+
+    -- Give weapon to player
+    --self:Give(item.Weapon or item)
+    -- Send to client
+    net.Start("sAndbox_GridSize_Inventory")
+    net.WriteTable(self.Inventory[itemslot])
+    net.WriteFloat(itemslot)
+    net.WriteBool(true) -- Default to true
+    net.Send(self)
+    net.Start("DAtaSendGrust")
+    net.Send(self)
+    return true
 end
 
 function PLAYER:RemoveInventoryItem(item)

@@ -89,7 +89,6 @@ net.Receive("sAndbox_GridSize_Inventory", function()
     inv_Slot = net.ReadFloat()
     local token = net.ReadBool()
     inventory = GridSize
-    
     -- Update existing slot or create new item
     if sAndbox.pnl[inv_Slot] and IsValid(sAndbox.pnl[inv_Slot]) and token and inventory["Mats"] then
         -- Clear old image if exists
@@ -105,6 +104,7 @@ net.Receive("sAndbox_GridSize_Inventory", function()
             Weapon = inventory["Weapon"],
             Mats = inventory["Mats"]
         }
+        sAndbox.img[inv_Slot].Paint = function() draw.DrawText(tostring(inventory["amount"]) or 0, "Default", 0, 0, Color(255, 255, 255), TEXT_ALIGN_LEFT) end
     elseif not token then
         -- Remove item if token is false
         ClearSlot(inventory, inv_Slot)
@@ -222,6 +222,7 @@ function sAndbox.InventoryMain()
             sAndbox.img[i]:Droppable("Inventory_gRust")
             sAndbox.img[i].CurrentSlot = i
             sAndbox.img[i].InventoryData = existingData
+            sAndbox.img[i].Paint = function() draw.DrawText(tostring(existingData.amount) or 0, "Default", 0, 0, Color(255, 255, 255), TEXT_ALIGN_LEFT) end
         end
     end
 

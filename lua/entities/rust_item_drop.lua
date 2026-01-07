@@ -42,7 +42,7 @@ function ENT:Use(act, ply)
     ply:AddInventoryItem({
         Weapon = self:GetItem(),
         Mats = self:GetImage(),
-    }, true)
+    }, self:GetCount(), true)
 
     ply:SelectWeapon(self:GetItem())
     self:Remove()
