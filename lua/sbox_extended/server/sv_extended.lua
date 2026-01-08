@@ -84,9 +84,6 @@ sAndbox.Event_Hook("PlayerSpawn", "NoRankSet", function(ply)
 
     if not ply.SurvivalStats then ply.SurvivalStats = {} end
     if not ply.Inventory then ply.Inventory = {} end
-    for i = 1, 36 do
-        ply.Inventory[i] = {}
-    end
 
     ply:Give("rust_e_hands")
     ply:RegisterPlayer("models/player/breen.mdl")
