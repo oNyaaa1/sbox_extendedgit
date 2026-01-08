@@ -5,7 +5,7 @@ util.AddNetworkString("sAndbox_Inventory_SaveSlots")
 util.AddNetworkString("sAndbox_Inventory_Drop")
 util.AddNetworkString("sAndbox_Inventory_SelectWeapon")
 util.AddNetworkString("sAndbox_Inventory_RequestAll")
-util.AddNetworkString("DAtaSendGrust")
+util.AddNetworkString("DataSendGrust")
 net.Receive("sAndbox_Inventory_RequestAll", function(len, pl)
     if not IsValid(pl) or not pl.Inventory then return end
     -- Send all inventory items to client
@@ -143,7 +143,7 @@ function PLAYER:AddInventoryItem(item, bool, amount, slot)
     net.WriteFloat(slot)
     net.WriteBool(bool ~= false) -- Default to true
     net.Send(self)
-    net.Start("DAtaSendGrust")
+    net.Start("DataSendGrust")
     net.Send(self)
     return true
 end
@@ -185,7 +185,7 @@ function PLAYER:ExistingInventoryItem(item, amount, ent)
     net.WriteFloat(itemslot)
     net.WriteBool(true)
     net.Send(self)
-    net.Start("DAtaSendGrust")
+    net.Start("DataSendGrust")
     net.Send(self)
     return true
 end
@@ -203,6 +203,7 @@ function PLAYER:CountRemoveInventoryItem(item, amountz)
     if slot == -1 then return end
     -- Clear inventory slot
     self.Inventory[slot].amount = self.Inventory[slot].amount - amountz
+    self.StoredAmount = self.StoredAmount - amountz
     -- Remove weapon from player
     if self:HasWeapon(item) then self:StripWeapon(item) end
     -- Send update to client
@@ -211,7 +212,7 @@ function PLAYER:CountRemoveInventoryItem(item, amountz)
     net.WriteFloat(slot)
     net.WriteBool(false)
     net.Send(self)
-    net.Start("DAtaSendGrust")
+    net.Start("DataSendGrust")
     net.Send(self)
 end
 
@@ -236,7 +237,7 @@ function PLAYER:RemoveInventoryItem(item)
     net.WriteFloat(slot)
     net.WriteBool(false)
     net.Send(self)
-    net.Start("DAtaSendGrust")
+    net.Start("DataSendGrust")
     net.Send(self)
 end
 
@@ -262,7 +263,7 @@ function PLAYER:LoadInventoryItem(item, bool, slot)
     net.WriteFloat(slot)
     net.WriteBool(bool ~= false) -- Default to true
     net.Send(self)
-    net.Start("DAtaSendGrust")
+    net.Start("DataSendGrust")
     net.Send(self)
 end
 
@@ -309,7 +310,7 @@ function PLAYER:ClearInventory()
     -- Clear inventory table
     self.Inventory = {}
     -- Notify client
-    net.Start("DAtaSendGrust")
+    net.Start("DataSendGrust")
     net.Send(self)
 end
 

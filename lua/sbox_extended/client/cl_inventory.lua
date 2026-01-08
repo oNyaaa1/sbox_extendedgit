@@ -90,7 +90,7 @@ local function DoDrop(self, panels, bDoDrop, Command, x, y)
     end
 end
 
-net.Receive("DAtaSendGrust", function()
+net.Receive("DataSendGrust", function()
     net.Start("sAndbox_Inventory_RequestAll")
     net.SendToServer()
 end)
