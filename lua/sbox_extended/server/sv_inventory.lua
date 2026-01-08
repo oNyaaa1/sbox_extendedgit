@@ -110,8 +110,9 @@ function PLAYER:FindSlot()
     return -1
 end
 
-function PLAYER:AddInventoryItem(item, bool, amount, ent, slot)
+function PLAYER:AddInventoryItem(item, bool, amount, slot)
     if not self.Inventory then self.Inventory = {} end
+    --if amount or 0 <= 0 then return end
     slot = slot or self:FindSlot()
     if slot == -1 then
         -- Inventory full
@@ -173,10 +174,6 @@ function PLAYER:ExistingInventoryItem(item, amount, ent)
     if not self.Inventory then self.Inventory = {} end
     local itemslot = self:FindItemSlot(item.Weapon or item)
     if itemslot == -1 then return false end
-    --if itemslot == -1 and self.StoredAmount >= 1000 then
-    -- No existing stack with room, try to add new
-    --return self:AddInventoryItem(item, true, amount, self)
-    -- end
     local itemz = ITEMS:GetItem(item.Weapon or item)
     if not itemz then return false end
     -- Update entity-specific storage
@@ -191,6 +188,31 @@ function PLAYER:ExistingInventoryItem(item, amount, ent)
     net.Start("DAtaSendGrust")
     net.Send(self)
     return true
+end
+
+function PLAYER:CountRemoveInventoryItem(item, amountz)
+    if not self.Inventory then return end
+    local slot = -1
+    for k, v in pairs(self.Inventory) do
+        if item == v.Weapon and v.Slot == k and v.amount >= amountz then
+            slot = k
+            break
+        end
+    end
+
+    if slot == -1 then return end
+    -- Clear inventory slot
+    self.Inventory[slot].amount = self.Inventory[slot].amount - amountz
+    -- Remove weapon from player
+    if self:HasWeapon(item) then self:StripWeapon(item) end
+    -- Send update to client
+    net.Start("sAndbox_GridSize_Inventory")
+    net.WriteTable(self.Inventory)
+    net.WriteFloat(slot)
+    net.WriteBool(false)
+    net.Send(self)
+    net.Start("DAtaSendGrust")
+    net.Send(self)
 end
 
 function PLAYER:RemoveInventoryItem(item)
@@ -210,7 +232,7 @@ function PLAYER:RemoveInventoryItem(item)
     if self:HasWeapon(item) then self:StripWeapon(item) end
     -- Send update to client
     net.Start("sAndbox_GridSize_Inventory")
-    net.WriteTable({})
+    net.WriteTable(self.Inventory)
     net.WriteFloat(slot)
     net.WriteBool(false)
     net.Send(self)
