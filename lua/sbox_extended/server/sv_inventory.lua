@@ -1,5 +1,4 @@
 local PLAYER = FindMetaTable("Player")
-
 util.AddNetworkString("sAndbox_GridSize_Inventory")
 util.AddNetworkString("sAndbox_GridSize_Inventory2")
 util.AddNetworkString("sAndbox_Inventory_SaveSlots")
@@ -7,12 +6,10 @@ util.AddNetworkString("sAndbox_Inventory_Drop")
 util.AddNetworkString("sAndbox_Inventory_SelectWeapon")
 util.AddNetworkString("sAndbox_Inventory_RequestAll")
 util.AddNetworkString("DAtaSendGrust")
-
 net.Receive("sAndbox_Inventory_RequestAll", function(len, pl)
     if not IsValid(pl) or not pl.Inventory then return end
-    
     -- Send all inventory items to client
-    for i = 1, 36 do
+    for i = 1, 30 do
         if pl.Inventory[i] and pl.Inventory[i].Weapon then
             net.Start("sAndbox_GridSize_Inventory")
             net.WriteTable(pl.Inventory)
@@ -25,29 +22,24 @@ end)
 
 net.Receive("sAndbox_Inventory_SelectWeapon", function(len, pl)
     local str_Wep = net.ReadString()
-    if IsValid(pl) and pl:HasWeapon(str_Wep) then 
-        pl:SelectWeapon(str_Wep) 
-    end
+    if IsValid(pl) and pl:HasWeapon(str_Wep) then pl:SelectWeapon(str_Wep) end
 end)
 
 net.Receive("sAndbox_Inventory_SaveSlots", function(len, pl)
     if not IsValid(pl) then return end
-    
     local oldslot = net.ReadFloat()
     local newslot = net.ReadFloat()
     local wep = net.ReadString()
     local mats = net.ReadString()
-    
     if wep == "" or mats == "" then return end
     if not pl.Inventory then pl.Inventory = {} end
-    
     -- Check if new slot has an item (need to swap)
     local swapItem = nil
     if pl.Inventory[newslot] and pl.Inventory[newslot].Weapon then
         swapItem = {
             Weapon = pl.Inventory[newslot].Weapon,
             Mats = pl.Inventory[newslot].Mats,
-            amount = pl.Inventory[newslot].amount or 1,
+            amount = pl.Inventory[newslot].amount or 0,
         }
     end
 
@@ -56,7 +48,7 @@ net.Receive("sAndbox_Inventory_SaveSlots", function(len, pl)
         Weapon = wep,
         Mats = mats,
         Slot = newslot,
-        amount = pl.Inventory[oldslot] and pl.Inventory[oldslot].amount or 1,
+        amount = pl.Inventory[oldslot] and pl.Inventory[oldslot].amount or 0,
     }
 
     -- If there was an item in new slot, move it to old slot (swap)
@@ -73,14 +65,10 @@ net.Receive("sAndbox_Inventory_SaveSlots", function(len, pl)
     end
 
     -- Handle weapon selection based on slot
-    if newslot >= 7 and newslot <= 36 then
-        if pl:HasWeapon("rust_e_hands") then 
-            pl:SelectWeapon("rust_e_hands") 
-        end
+    if newslot >= 7 and newslot <= 30 then
+        if pl:HasWeapon("rust_e_hands") then pl:SelectWeapon("rust_e_hands") end
     elseif newslot >= 1 and newslot <= 6 then
-        if pl:HasWeapon(wep) then 
-            pl:SelectWeapon(wep) 
-        end
+        if pl:HasWeapon(wep) then pl:SelectWeapon(wep) end
     end
 
     -- Send new slot update to client
@@ -89,7 +77,6 @@ net.Receive("sAndbox_Inventory_SaveSlots", function(len, pl)
     net.WriteFloat(newslot)
     net.WriteBool(true)
     net.Send(pl)
-    
     -- Send old slot update (either swapped item or clear)
     net.Start("sAndbox_GridSize_Inventory")
     if swapItem then
@@ -101,30 +88,30 @@ net.Receive("sAndbox_Inventory_SaveSlots", function(len, pl)
         net.WriteFloat(oldslot)
         net.WriteBool(false)
     end
+
     net.Send(pl)
 end)
 
 function PLAYER:FindSlot()
-    if not self.Inventory then 
-        self.Inventory = {} 
+    if not self.Inventory then
+        self.Inventory = {}
         return 7
     end
-    
+
     -- Find first empty slot
-    for i = 7, 36 do
-        if not self.Inventory[i] or not self.Inventory[i].Weapon then
-            return i
-        end
+    for i = 7, 30 do
+        if not self.Inventory[i] or not self.Inventory[i].Weapon then return i end
     end
-    
+
+    for i = 1, 6 do
+        if not self.Inventory[i] or not self.Inventory[i].Weapon then return i end
+    end
     -- If no empty slots, return -1
     return -1
 end
 
 function PLAYER:AddInventoryItem(item, bool, amount, ent, slot)
-    ent = ent or nil
     if not self.Inventory then self.Inventory = {} end
-    
     slot = slot or self:FindSlot()
     if slot == -1 then
         -- Inventory full
@@ -133,13 +120,13 @@ function PLAYER:AddInventoryItem(item, bool, amount, ent, slot)
 
     local itemz = ITEMS:GetItem(item.Weapon or item)
     if not itemz then return false end
-    
-    amount = amount or 1
-    if ent and IsValid(ent) then 
-        ent:SetNWFloat("Wood", ent:GetNWFloat("Wood", 0) + amount) 
-        amount = ent:GetNWFloat("Wood", 1)
+    -- Use entity-specific storage instead of global NWFloat
+    if self and IsValid(self) then
+        if not self.StoredAmount then self.StoredAmount = 0 end
+        self.StoredAmount = self.StoredAmount + amount
+        amount = self.StoredAmount
     end
-    
+
     self.Inventory[slot] = {
         Weapon = item.Weapon or item,
         Mats = itemz.model,
@@ -149,108 +136,90 @@ function PLAYER:AddInventoryItem(item, bool, amount, ent, slot)
 
     -- Give weapon to player
     self:Give(item.Weapon or item)
-    
     -- Send to client
     net.Start("sAndbox_GridSize_Inventory")
     net.WriteTable(self.Inventory)
     net.WriteFloat(slot)
     net.WriteBool(bool ~= false) -- Default to true
     net.Send(self)
-    
     net.Start("DAtaSendGrust")
     net.Send(self)
-    
     return true
 end
 
 function PLAYER:FindItemSlot(item)
     if not self.Inventory then return -1 end
-    
     local itemz = ITEMS:GetItem(item)
     if not itemz then return -1 end
-    
-    for i = 7, 36 do
+    for i = 1, 30 do
         if self.Inventory[i] and self.Inventory[i].Weapon == item then
             local currentAmount = self.Inventory[i].amount or 0
-            if currentAmount < itemz.StackSize then
-                return i
-            end
+            if currentAmount < itemz.StackSize then return i end
         end
     end
-    
     return -1
 end
 
 function PLAYER:ExistingInventoryItem(item, amount, ent)
-    if not ent or not IsValid(ent) then return false end
-    if ent:GetNWFloat("Wood", 0) >= 1000 then 
-        ent:SetNWFloat("Wood", 0) 
-        return false 
+    if not self or not IsValid(self) then return false end
+    -- Use entity-specific storage
+    if not self.StoredAmount then self.StoredAmount = 0 end
+    -- Check if reached max stack
+    if self.StoredAmount >= 1000 then
+        self.StoredAmount = 0
+        return false
     end
-    
+
     if not self.Inventory then self.Inventory = {} end
-    
     local itemslot = self:FindItemSlot(item.Weapon or item)
-    if itemslot == -1 then 
-        -- No existing stack with room, try to add new
-        return self:AddInventoryItem(item, true, amount, ent)
-    end
-    
+    if itemslot == -1 then return false end
+    --if itemslot == -1 and self.StoredAmount >= 1000 then
+    -- No existing stack with room, try to add new
+    --return self:AddInventoryItem(item, true, amount, self)
+    -- end
     local itemz = ITEMS:GetItem(item.Weapon or item)
     if not itemz then return false end
-    
-    ent:SetNWFloat("Wood", ent:GetNWFloat("Wood", 0) + amount)
-    
-    self.Inventory[itemslot].amount = tonumber(ent:GetNWFloat("Wood", 0))
-    
+    -- Update entity-specific storage
+    self.StoredAmount = self.StoredAmount + amount
+    self.Inventory[itemslot].amount = self.StoredAmount
     -- Send to client
     net.Start("sAndbox_GridSize_Inventory")
     net.WriteTable(self.Inventory)
     net.WriteFloat(itemslot)
     net.WriteBool(true)
     net.Send(self)
-    
     net.Start("DAtaSendGrust")
     net.Send(self)
-    
     return true
 end
 
 function PLAYER:RemoveInventoryItem(item)
     if not self.Inventory then return end
-    
     local slot = -1
-    for i = 1, 36 do
+    for i = 1, 30 do
         if self.Inventory[i] and self.Inventory[i].Weapon == item then
             slot = i
             break
         end
     end
-    
+
     if slot == -1 then return end
-    
     -- Clear inventory slot
     self.Inventory[slot] = nil
-    
     -- Remove weapon from player
-    if self:HasWeapon(item) then 
-        self:StripWeapon(item) 
-    end
-    
+    if self:HasWeapon(item) then self:StripWeapon(item) end
     -- Send update to client
     net.Start("sAndbox_GridSize_Inventory")
     net.WriteTable({})
     net.WriteFloat(slot)
     net.WriteBool(false)
     net.Send(self)
-    
     net.Start("DAtaSendGrust")
     net.Send(self)
 end
 
 function PLAYER:LoadInventoryItem(item, bool, slot)
     if not self.Inventory then self.Inventory = {} end
-    
     slot = slot or self:FindSlot()
     if slot == -1 then
         slot = 7 -- Default to first storage slot
@@ -260,49 +229,39 @@ function PLAYER:LoadInventoryItem(item, bool, slot)
         Weapon = item.Weapon or item,
         Mats = item.Mats,
         Slot = slot,
-        amount = item.amount or 1,
+        amount = item.amount or 0,
     }
 
     -- Give weapon to player
     self:Give(item.Weapon or item)
-    
     -- Send to client
     net.Start("sAndbox_GridSize_Inventory")
     net.WriteTable(self.Inventory)
     net.WriteFloat(slot)
     net.WriteBool(bool ~= false) -- Default to true
     net.Send(self)
-    
     net.Start("DAtaSendGrust")
     net.Send(self)
 end
 
 net.Receive("sAndbox_Inventory_Drop", function(len, ply)
     if not IsValid(ply) then return end
-    
     local item = net.ReadString()
     local img = net.ReadString()
-    
     if item == "" then return end
-    
-    -- Create dropped item entity
+    -- Create dropped item entity (fixed variable shadowing bug)
     local ent = ents.Create("rust_item_drop")
     if not IsValid(ent) then return end
-    
     ent:SetCount(1)
     ent:SetItem(item)
     ent:SetImage(img)
     ent:SetPos(ply:GetPos() + ply:GetForward() * 32 + Vector(0, 0, 16))
     ent:Spawn()
     ent:Activate()
-    
     -- Remove from inventory
     ply:RemoveInventoryItem(item)
-    
     -- Equip hands
-    if ply:HasWeapon("rust_e_hands") then 
-        ply:SelectWeapon("rust_e_hands") 
-    end
+    if ply:HasWeapon("rust_e_hands") then ply:SelectWeapon("rust_e_hands") end
 end)
 
 function PLAYER:CountInventory()
@@ -312,37 +271,28 @@ function PLAYER:CountInventory()
     end
 
     local count = 0
-    for i = 1, 36 do
-        if self.Inventory[i] and self.Inventory[i].Weapon then 
-            count = count + 1 
-        end
+    for i = 1, 30 do
+        if self.Inventory[i] and self.Inventory[i].Weapon then count = count + 1 end
     end
     return count
 end
 
 function PLAYER:ClearInventory()
     if not self.Inventory then return end
-    
     -- Strip all weapons
-    for i = 1, 36 do
-        if self.Inventory[i] and self.Inventory[i].Weapon then
-            if self:HasWeapon(self.Inventory[i].Weapon) then
-                self:StripWeapon(self.Inventory[i].Weapon)
-            end
-        end
+    for i = 1, 30 do
+        if self.Inventory[i] and self.Inventory[i].Weapon then if self:HasWeapon(self.Inventory[i].Weapon) then self:StripWeapon(self.Inventory[i].Weapon) end end
     end
-    
+
     -- Clear inventory table
     self.Inventory = {}
-    
     -- Notify client
     net.Start("DAtaSendGrust")
     net.Send(self)
 end
 
 -- Initialize inventory on spawn
-hook.Add("PlayerSpawn", "sAndbox_InitInventory", function(ply) 
-    if not ply.Inventory then 
-        ply.Inventory = {} 
-    end
+hook.Add("PlayerSpawn", "sAndbox_InitInventory", function(ply)
+    if not ply.Inventory then ply.Inventory = {} end
+    ply.StoredAmount = 0
 end)
