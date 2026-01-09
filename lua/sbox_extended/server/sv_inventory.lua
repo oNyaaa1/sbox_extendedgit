@@ -122,12 +122,6 @@ function PLAYER:AddInventoryItem(item, bool, amount, slot)
     local itemz = ITEMS:GetItem(item.Weapon or item)
     if not itemz then return false end
     -- Use entity-specific storage instead of global NWFloat
-    if self and IsValid(self) then
-        if not self.StoredAmount then self.StoredAmount = 0 end
-        self.StoredAmount = self.StoredAmount + amount
-        amount = self.StoredAmount
-    end
-
     self.Inventory[slot] = {
         Weapon = item.Weapon or item,
         Mats = itemz.model,
@@ -136,7 +130,7 @@ function PLAYER:AddInventoryItem(item, bool, amount, slot)
     }
 
     -- Give weapon to player
-    self:Give(item.Weapon or item)
+    if weapons.Get(item.Weapon) then self:Give(item.Weapon or item) end
     -- Send to client
     net.Start("sAndbox_GridSize_Inventory")
     net.WriteTable(self.Inventory)
@@ -163,22 +157,19 @@ end
 
 function PLAYER:ExistingInventoryItem(item, amount, ent)
     if not self or not IsValid(self) then return false end
-    -- Use entity-specific storage
-    if not self.StoredAmount then self.StoredAmount = 0 end
     -- Check if reached max stack
-    if self.StoredAmount >= 1000 then
-        self.StoredAmount = 0
-        return false
-    end
-
     if not self.Inventory then self.Inventory = {} end
     local itemslot = self:FindItemSlot(item.Weapon or item)
     if itemslot == -1 then return false end
     local itemz = ITEMS:GetItem(item.Weapon or item)
     if not itemz then return false end
     -- Update entity-specific storage
-    self.StoredAmount = self.StoredAmount + amount
-    self.Inventory[itemslot].amount = self.StoredAmount
+    if self.Inventory[itemslot].amount >= 1000 then
+        self.Inventory[itemslot].amount = 0
+        return false
+    end
+
+    self.Inventory[itemslot].amount = self.Inventory[itemslot].amount + amount
     -- Send to client
     net.Start("sAndbox_GridSize_Inventory")
     net.WriteTable(self.Inventory)
@@ -271,19 +262,22 @@ net.Receive("sAndbox_Inventory_Drop", function(len, ply)
     if not IsValid(ply) then return end
     local item = net.ReadString()
     local img = net.ReadString()
+    local slotZ = net.ReadFloat()
+    local slot = 7
     if item == "" then return end
-    -- Create dropped item entity (fixed variable shadowing bug)
+    local r_Slot = ply:FindSlot()
+    print(slotZ, r_Slot)
+    slot = r_Slot ~= slotZ and slotZ or r_Slot
     local ent = ents.Create("rust_item_drop")
     if not IsValid(ent) then return end
-    ent:SetCount(1)
+    ent:SetCount(ply.Inventory[slotZ].amount)
     ent:SetItem(item)
     ent:SetImage(img)
+    ent:SetSlot(slot)
     ent:SetPos(ply:GetPos() + ply:GetForward() * 32 + Vector(0, 0, 16))
     ent:Spawn()
     ent:Activate()
-    -- Remove from inventory
     ply:RemoveInventoryItem(item)
-    -- Equip hands
     if ply:HasWeapon("rust_e_hands") then ply:SelectWeapon("rust_e_hands") end
 end)
 

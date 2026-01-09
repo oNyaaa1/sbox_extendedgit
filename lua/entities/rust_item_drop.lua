@@ -5,6 +5,7 @@ ENT.PrintName = "Item Loot Drop"
 ENT.Count = 0
 ENT.Item = ""
 ENT.Image = ""
+ENT.Slot = 1
 function ENT:Initialize()
     if CLIENT then return end
     self:SetModel("models/environment/misc/loot_bag.mdl")
@@ -12,6 +13,10 @@ function ENT:Initialize()
     self:SetMoveType(MOVETYPE_VPHYSICS)
     self:SetSolid(SOLID_VPHYSICS)
     self:SetUseType(SIMPLE_USE)
+end
+
+function ENT:SetSlot(count)
+    self.Slot = count
 end
 
 function ENT:SetCount(count)
@@ -38,10 +43,14 @@ function ENT:GetCount()
     return self.Count
 end
 
+function ENT:GetSlot()
+    return self.Slot
+end
+
 function ENT:Use(act, ply)
     ply:AddInventoryItem({
         Weapon = self:GetItem(),
-    }, self:GetCount(), true)
+    }, true, self:GetCount(), self:GetSlot())
 
     ply:SelectWeapon(self:GetItem())
     self:Remove()
