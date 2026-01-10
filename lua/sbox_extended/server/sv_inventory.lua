@@ -6,6 +6,8 @@ util.AddNetworkString("sAndbox_Inventory_Drop")
 util.AddNetworkString("sAndbox_Inventory_SelectWeapon")
 util.AddNetworkString("sAndbox_Inventory_RequestAll")
 util.AddNetworkString("DataSendGrust")
+util.AddNetworkString("FixedDeath")
+util.AddNetworkString("FixedSpawnInv")
 net.Receive("sAndbox_Inventory_RequestAll", function(len, pl)
     if not IsValid(pl) or not pl.Inventory then return end
     -- Send all inventory items to client
@@ -18,6 +20,18 @@ net.Receive("sAndbox_Inventory_RequestAll", function(len, pl)
             net.Send(pl)
         end
     end
+end)
+
+hook.Add("PlayerDeath", "MehDeathIR", function(victim, attk, pler)
+    net.Start("FixedDeath")
+    net.Send(victim)
+end)
+
+hook.Add("PlayerSpawn", "sAndbox_InitInventory", function(ply)
+    ply.Inventory = {}
+    net.Start("FixedSpawnInv")
+    net.Send(ply)
+    ply.StoredAmount = 0
 end)
 
 net.Receive("sAndbox_Inventory_SelectWeapon", function(len, pl)
@@ -265,6 +279,7 @@ net.Receive("sAndbox_Inventory_Drop", function(len, ply)
     local slotZ = net.ReadFloat()
     local slot = 7
     if item == "" then return end
+    if ply.Inventory[slotZ] == nil then return end
     local r_Slot = ply:FindSlot()
     slot = r_Slot ~= slotZ and slotZ or r_Slot
     local ent = ents.Create("rust_item_drop")
@@ -273,7 +288,7 @@ net.Receive("sAndbox_Inventory_Drop", function(len, ply)
     ent:SetItem(item)
     ent:SetImage(img)
     ent:SetSlot(slot)
-    ent:SetPos(ply:GetPos() + ply:GetForward() * 32 + Vector(0, 0, 16))
+    ent:SetPos(ply:GetPos() + ply:GetForward() * 32 + Vector(0, 0, 50))
     ent:Spawn()
     ent:Activate()
     ply:RemoveInventoryItem(item)
@@ -306,9 +321,3 @@ function PLAYER:ClearInventory()
     net.Start("DataSendGrust")
     net.Send(self)
 end
-
--- Initialize inventory on spawn
-hook.Add("PlayerSpawn", "sAndbox_InitInventory", function(ply)
-    if not ply.Inventory then ply.Inventory = {} end
-    ply.StoredAmount = 0
-end)

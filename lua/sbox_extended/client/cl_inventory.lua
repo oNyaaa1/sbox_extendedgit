@@ -1,19 +1,24 @@
 if SERVER then return end
 local frame = nil
 local inv_Slot = 1
-local inventory = {}
 sAndbox = sAndbox or {}
 sAndbox.tnkSlots = {}
 sAndbox.img = {}
 sAndbox.pnl = {}
 local BlehsAndbox = false
 local howMany = false
-local function ClearSlot(inv, slotID)
+local function ClearSlot(slotID)
     if sAndbox.img[slotID] and IsValid(sAndbox.img[slotID]) then
         sAndbox.img[slotID]:Remove()
         sAndbox.img[slotID] = nil
     end
 end
+
+net.Receive("FixedDeath", function()
+    for i = 1, 6 do
+        ClearSlot(i)
+    end
+end)
 
 local function DropItem(inv, wep, mats, slot)
     if wep == nil or mats == nil then return end
@@ -26,7 +31,7 @@ end
 
 local function DoDrop(self, panels, bDoDrop, Command, x, y)
     if not bDoDrop or not panels[1] then return end
-    -- Dropping outside inventory (to ground)
+    -- Dropping outside LocalPlayer().inventory (to ground)
     if self:GetParent():GetClassName() == "CGModBase" then
         if panels[1].InventoryData then
             DropItem(nil, panels[1].InventoryData.Weapon, panels[1].InventoryData.Mats, panels[1].CurrentSlot or self.RealSlotID)
@@ -84,13 +89,15 @@ net.Receive("DataSendGrust", function()
     net.SendToServer()
 end)
 
+net.Receive("FixedSpawnInv", function() if not LocalPlayer().inventory then LocalPlayer().inventory = {} end end)
 net.Receive("sAndbox_GridSize_Inventory", function()
+    if not LocalPlayer().inventory then LocalPlayer().inventory = {} end
     local GridSize = net.ReadTable()
     inv_Slot = net.ReadFloat()
     local token = net.ReadBool()
-    inventory = GridSize
+    LocalPlayer().inventory = GridSize
     -- Update existing slot or create new item
-    for k, v in pairs(inventory) do
+    for k, v in pairs(LocalPlayer().inventory or {}) do
         if not istable(v) then continue end
         if not isstring(v["Mats"]) then continue end
         if v.Slot ~= inv_Slot then continue end
@@ -111,7 +118,7 @@ net.Receive("sAndbox_GridSize_Inventory", function()
 
             sAndbox.img[inv_Slot].Paint = function() draw.DrawText(v and tostring(v["amount"]) or "0", "Default", 0, 0, Color(255, 255, 255), TEXT_ALIGN_LEFT) end
         elseif not token then
-            ClearSlot(v, inv_Slot)
+            ClearSlot(inv_Slot)
         end
 
         -- Create hotbar (slots 1-6) if it doesn't exist
@@ -240,7 +247,7 @@ function sAndbox.InventoryMain()
         end
     end
 
-    hook.Call("LoadInventory", nil, sAndbox.pnl, sAndbox.pnl, frame, inventory, inv_Slot)
+    hook.Call("LoadInventory", nil, sAndbox.pnl, sAndbox.pnl, frame, LocalPlayer().inventory, inv_Slot)
     return frame
 end
 

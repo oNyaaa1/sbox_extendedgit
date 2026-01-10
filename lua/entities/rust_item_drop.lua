@@ -13,6 +13,16 @@ function ENT:Initialize()
     self:SetMoveType(MOVETYPE_VPHYSICS)
     self:SetSolid(SOLID_VPHYSICS)
     self:SetUseType(SIMPLE_USE)
+    local phys = self:GetPhysicsObject()
+    if IsValid(phys) then
+        phys:Wake()
+        timer.Simple(0.1, function()
+            if IsValid(self) and IsValid(phys) then
+                phys:EnableMotion(false)
+                self:DropToFloor()
+            end
+        end)
+    end
 end
 
 function ENT:SetSlot(count)
