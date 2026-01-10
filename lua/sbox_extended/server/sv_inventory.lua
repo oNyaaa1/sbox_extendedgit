@@ -155,7 +155,7 @@ function PLAYER:FindItemSlot(item)
     return -1
 end
 
-function PLAYER:ExistingInventoryItem(item, amount, ent)
+function PLAYER:ExistingInventoryItem(item, amount)
     if not self or not IsValid(self) then return false end
     -- Check if reached max stack
     if not self.Inventory then self.Inventory = {} end
@@ -266,7 +266,6 @@ net.Receive("sAndbox_Inventory_Drop", function(len, ply)
     local slot = 7
     if item == "" then return end
     local r_Slot = ply:FindSlot()
-    print(slotZ, r_Slot)
     slot = r_Slot ~= slotZ and slotZ or r_Slot
     local ent = ents.Create("rust_item_drop")
     if not IsValid(ent) then return end
