@@ -104,6 +104,8 @@ net.Receive("sAndbox_Inventory_SaveSlots", function(len, pl)
     end
 
     net.Send(pl)
+    net.Start("DataSendGrust")
+    net.Send(pl)
 end)
 
 function PLAYER:FindSlot()
@@ -195,16 +197,9 @@ function PLAYER:ExistingInventoryItem(item, amount)
     return true
 end
 
-function PLAYER:CountRemoveInventoryItem(item, amountz)
+function PLAYER:CountRemoveInventoryItem(item, amountz, slotz)
     if not self.Inventory then return end
-    local slot = -1
-    for k, v in pairs(self.Inventory) do
-        if item == v.Weapon and v.Slot == k and v.amount >= amountz then
-            slot = k
-            break
-        end
-    end
-
+    local slot = slotz or self:FindItemSlot(item)
     if slot == -1 then return end
     -- Clear inventory slot
     self.Inventory[slot].amount = self.Inventory[slot].amount - amountz
@@ -221,16 +216,9 @@ function PLAYER:CountRemoveInventoryItem(item, amountz)
     net.Send(self)
 end
 
-function PLAYER:RemoveInventoryItem(item)
+function PLAYER:RemoveInventoryItem(item, slozt)
     if not self.Inventory then return end
-    local slot = -1
-    for i = 1, 30 do
-        if self.Inventory[i] and self.Inventory[i].Weapon == item then
-            slot = i
-            break
-        end
-    end
-
+    local slot = slozt or self:FindItemSlot(item)
     if slot == -1 then return end
     -- Clear inventory slot
     self.Inventory[slot] = nil
@@ -240,10 +228,10 @@ function PLAYER:RemoveInventoryItem(item)
     net.Start("sAndbox_GridSize_Inventory")
     net.WriteTable(self.Inventory)
     net.WriteFloat(slot)
-    net.WriteBool(false)
+    net.WriteBool(true)
     net.Send(self)
-    net.Start("DataSendGrust")
-    net.Send(self)
+    //net.Start("DataSendGrust")
+    //net.Send(self)
 end
 
 function PLAYER:LoadInventoryItem(item, bool, slot)
@@ -291,7 +279,7 @@ net.Receive("sAndbox_Inventory_Drop", function(len, ply)
     ent:SetPos(ply:GetPos() + ply:GetForward() * 32 + Vector(0, 0, 50))
     ent:Spawn()
     ent:Activate()
-    ply:RemoveInventoryItem(item)
+    ply:RemoveInventoryItem(item, slot)
     if ply:HasWeapon("rust_e_hands") then ply:SelectWeapon("rust_e_hands") end
 end)
 

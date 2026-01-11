@@ -58,15 +58,9 @@ function ENT:GetSlot()
 end
 
 function ENT:Use(act, ply)
-    local weps = ply:ExistingInventoryItem({
+    ply:AddInventoryItem({
         Weapon = self:GetItem(),
-    }, self:GetCount())
-
-    if not weps then
-        ply:AddInventoryItem({
-            Weapon = self:GetItem(),
-        }, true, self:GetCount())
-    end
+    }, true, self:GetCount())
 
     ply:SelectWeapon(self:GetItem())
     self:Remove()
