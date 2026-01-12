@@ -96,6 +96,7 @@ net.Receive("sAndbox_GridSize_Inventory", function()
     inv_Slot = net.ReadFloat()
     local token = net.ReadBool()
     LocalPlayer().inventory = GridSize
+    ClearSlot(inv_Slot)
     -- Update existing slot or create new item
     for k, v in pairs(LocalPlayer().inventory or {}) do
         if not istable(v) then continue end

@@ -221,17 +221,18 @@ function PLAYER:RemoveInventoryItem(item, slozt)
     local slot = slozt or self:FindItemSlot(item)
     if slot == -1 then return end
     -- Clear inventory slot
-    self.Inventory[slot] = nil
+    self.Inventory[slot] = {}
     -- Remove weapon from player
     if self:HasWeapon(item) then self:StripWeapon(item) end
+    self:SelectWeapon("rust_e_hands")
     -- Send update to client
     net.Start("sAndbox_GridSize_Inventory")
     net.WriteTable(self.Inventory)
     net.WriteFloat(slot)
     net.WriteBool(true)
     net.Send(self)
-    //net.Start("DataSendGrust")
-    //net.Send(self)
+    net.Start("DataSendGrust")
+    net.Send(self)
 end
 
 function PLAYER:LoadInventoryItem(item, bool, slot)
@@ -281,6 +282,8 @@ net.Receive("sAndbox_Inventory_Drop", function(len, ply)
     ent:Activate()
     ply:RemoveInventoryItem(item, slot)
     if ply:HasWeapon("rust_e_hands") then ply:SelectWeapon("rust_e_hands") end
+    net.Start("DataSendGrust")
+    net.Send(self)
 end)
 
 function PLAYER:CountInventory()
