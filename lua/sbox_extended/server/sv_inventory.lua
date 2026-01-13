@@ -283,7 +283,7 @@ net.Receive("sAndbox_Inventory_Drop", function(len, ply)
     ply:RemoveInventoryItem(item, slot)
     if ply:HasWeapon("rust_e_hands") then ply:SelectWeapon("rust_e_hands") end
     net.Start("DataSendGrust")
-    net.Send(self)
+    net.Send(ply)
 end)
 
 function PLAYER:CountInventory()
