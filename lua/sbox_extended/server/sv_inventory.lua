@@ -221,10 +221,10 @@ function PLAYER:RemoveInventoryItem(item, slozt)
     local slot = slozt or self:FindItemSlot(item)
     if slot == -1 then return end
     -- Clear inventory slot
+    self:SelectWeapon("rust_e_hands")
     self.Inventory[slot] = {}
     -- Remove weapon from player
     if self:HasWeapon(item) then self:StripWeapon(item) end
-    self:SelectWeapon("rust_e_hands")
     -- Send update to client
     net.Start("sAndbox_GridSize_Inventory")
     net.WriteTable(self.Inventory)
