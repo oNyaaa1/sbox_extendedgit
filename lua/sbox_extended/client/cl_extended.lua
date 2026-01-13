@@ -81,7 +81,9 @@ end, {
 })
 
 DrawHuds = sAndbox.using("DrawHud")
+local Legs_CV = CreateConVar("sAndbox_legs", 1, {FCVAR_ARCHIVE})
 hook.Add("CalcView", "EasyLookDown", function(ply, pos, angles, fov, znear, zfar)
+    if Legs_CV:GetFloat() ~= 1 then return end
     if angles.p <= 82 then
         local view = {
             origin = pos,
