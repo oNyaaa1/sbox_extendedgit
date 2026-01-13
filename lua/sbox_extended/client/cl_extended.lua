@@ -100,7 +100,7 @@ hook.Add("CalcView", "EasyLookDown", function(ply, pos, angles, fov, znear, zfar
 
         local bodyAngles = ply:GetAngles()
         local view = {
-            origin = eyePos + (bodyAngles:Forward() * 5) + (bodyAngles:Up() * 13),
+            origin = eyePos + (bodyAngles:Forward() * 2) + (bodyAngles:Up() * 2),
             angles = angles,
             fov = fov,
             drawviewer = true,
