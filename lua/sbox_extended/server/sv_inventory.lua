@@ -162,12 +162,17 @@ function PLAYER:FindItemSlot(item)
     if not self.Inventory then return -1 end
     local itemz = ITEMS:GetItem(item)
     if not itemz then return -1 end
-    for i = 1, 30 do
+    for k, v in pairs(self.Inventory) do
+        if v.Weapon == item then return v.Slot end
+    end
+    --[[
+
+for i = 1, 30 do
         if self.Inventory[i] and self.Inventory[i].Weapon == item then
             local currentAmount = self.Inventory[i].amount or 0
-            if currentAmount < itemz.StackSize then return i end
+            if itemz.StackSize and currentAmount < itemz.StackSize then return i end
         end
-    end
+    end]]
     return -1
 end
 
