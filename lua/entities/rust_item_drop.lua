@@ -8,21 +8,14 @@ ENT.Image = ""
 ENT.Slot = 1
 function ENT:Initialize()
     if CLIENT then return end
-    self:SetModel("models/environment/misc/loot_bag.mdl")
+    self:SetModel("models/blacksnow/smallstash.mdl")
     self:PhysicsInitStatic(SOLID_VPHYSICS)
     self:SetMoveType(MOVETYPE_VPHYSICS)
     self:SetSolid(SOLID_VPHYSICS)
     self:SetUseType(SIMPLE_USE)
     local phys = self:GetPhysicsObject()
-    if IsValid(phys) then
-        phys:Wake()
-        timer.Simple(0.1, function()
-            if IsValid(self) and IsValid(phys) then
-                phys:EnableMotion(false)
-                self:DropToFloor()
-            end
-        end)
-    end
+    if IsValid(phys) then phys:Wake() end
+    
 end
 
 function ENT:SetSlot(count)
