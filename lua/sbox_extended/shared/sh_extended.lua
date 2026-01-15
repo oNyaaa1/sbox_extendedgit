@@ -260,12 +260,19 @@ local positions = {
         if num == 2 then return Vector(62, 0, 8), 90 end
         if num == 3 then return Vector(0, -62, 8), 0 end
         if num == 4 then return Vector(-62, 0, 8), 90 end
+    end,
+    ["sent_door_dd_armoured"] = function(ply)
+        local text = math.Round(360 - ((ply:GetAngles().y - 360) % 360))
+        local num = ENUM_LOOK_AT(text)
+        if num == 1 then return Vector(0, 62, 8), 0 end
+        if num == 2 then return Vector(62, 0, 8), 90 end
+        if num == 3 then return Vector(0, -62, 8), 0 end
+        if num == 4 then return Vector(-62, 0, 8), 90 end
     end
 }
 
 local ENTITY = FindMetaTable("Entity")
 function ENTITY:FindSocketAdvanced(ply, need)
-    print(ply,need)
     local pos, ang = positions[need](ply)
     return pos, ang
 end

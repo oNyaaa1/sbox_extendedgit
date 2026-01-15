@@ -241,7 +241,6 @@ function sAndbox.InventoryMain()
                     -- if not istable(v) then continue end
                     --if not isstring(v["Mats"]) then continue end
                     -- if v.Slot ~= i then continue end
-                    print(LocalPlayer().Inventory[k]["amount"])
                     draw.DrawText(tostring(LocalPlayer().Inventory[k]["amount"]) or "0", "Default", 0, 0, Color(255, 255, 255), TEXT_ALIGN_LEFT)
                 end
             end
