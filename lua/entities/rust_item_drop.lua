@@ -9,13 +9,12 @@ ENT.Slot = 1
 function ENT:Initialize()
     if CLIENT then return end
     self:SetModel("models/blacksnow/smallstash.mdl")
-    self:PhysicsInitStatic(SOLID_VPHYSICS)
+    self:PhysicsInit(SOLID_VPHYSICS)
     self:SetMoveType(MOVETYPE_VPHYSICS)
     self:SetSolid(SOLID_VPHYSICS)
     self:SetUseType(SIMPLE_USE)
     local phys = self:GetPhysicsObject()
     if IsValid(phys) then phys:Wake() end
-    
 end
 
 function ENT:SetSlot(count)
@@ -57,4 +56,10 @@ function ENT:Use(act, ply)
 
     ply:SelectWeapon(self:GetItem())
     self:Remove()
+end
+
+if CLIENT then
+    function ENT:Draw()
+        self:DrawModel()
+    end
 end
